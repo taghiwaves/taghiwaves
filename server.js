@@ -71,7 +71,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
     }));
 
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card', 'paypal'],
+      payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
       success_url: `${req.headers.origin}/success.html?session_id={CHECKOUT_SESSION_ID}`,
