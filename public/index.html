@@ -768,7 +768,7 @@
                     return;
                 }
                 
-                stripe = Stripe('pk_test_YOUR_PUBLISHABLE_KEY'); // Replace with your key
+                stripe = Stripe('pk_live_51TJzoPCG1b2pY2XXHU9LFix07eRj1xl4q03YyAIK8GHLBcLYvlv4HBrHYWqmwHKeBbjaicHBcWWqGUay0SyBZO3y00C23aqVOP'); // Replace with your key
                 await stripe.redirectToCheckout({ sessionId: session.id });
                 
             } catch (error) {
