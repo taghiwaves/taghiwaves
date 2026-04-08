@@ -15,42 +15,38 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Produkte (in Produktion: Datenbank)
 const products = [
   {
-    id: "prod_1",
-    name: "Das ultimative Mixing Handbook",
-    price: 4999, // cents
-    description: "150-seitiges Kompendium mit allen Mixing-Techniken"
+    id: "prod_cheat",
+    name: "Mixing EQ Cheat Sheet",
+    price: 99, // 0,99€ in cents
+    description: "Schnellreferenz für EQ-Einstellungen aller Instrumente. PDF-Download."
   },
-  {
-    id: "prod_2", 
-    name: "Mastering Pro Workflow",
-    price: 5999,
-    description: "Schritt-für-Schritt Mastering-Guide"
-  },
-  {
-    id: "prod_3",
-    name: "Vocal Mixing Masterclass", 
-    price: 3999,
-    description: "Spezialguide für professionelle Vocal-Produktion"
-  },
-  {
-    id: "prod_4",
-    name: "Ableton Live Project Templates",
-    price: 3499,
-    description: "5 fertige Projekt-Templates"
-  },
-  {
-    id: "prod_5",
-    name: "Synthesizer Sound Design",
-    price: 4499,
-    description: "Sound Design für Serum, Vital und Analog-Synths"
-  },
-  {
-    id: "prod_6",
-    name: "Drum Programming Bible",
-    price: 2999,
-    description: "Rhythmus-Patterns und Mixing-Tricks"
-  }
+  // ... andere Produkte
 ];
+
+// Sichere Download-Route (nach erfolgreicher Zahlung)
+app.get('/api/download/:productId', async (req, res) => {
+  const sessionId = req.query.session_id;
+  
+  if (!sessionId) {
+    return res.status(403).send('Zugriff verweigert. Bitte erst kaufen.');
+  }
+  
+  try {
+    // Prüfe ob Zahlung erfolgreich war
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    
+    if (session.payment_status !== 'paid') {
+      return res.status(403).send('Zahlung nicht bestätigt.');
+    }
+    
+    // Sende Datei
+    const filePath = path.join(__dirname, 'public', 'downloads', 'mixing-eq-guide.pdf');
+    res.download(filePath, 'Mixing-EQ-Cheat-Sheet.pdf');
+    
+  } catch (error) {
+    res.status(500).send('Download-Fehler: ' + error.message);
+  }
+});
 
 // API: Produkte abrufen
 app.get('/api/products', (req, res) => {

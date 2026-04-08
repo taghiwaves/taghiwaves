@@ -567,16 +567,16 @@
             .then(res => res.json())
             .then(data => {
                 products = data.map((p, index) => ({
-                    id: index + 1,
-                    stripeId: p.id,
-                    title: p.name,
-                    category: getCategory(p.name),
-                    description: p.description,
-                    price: p.price / 100,
-                    pages: getPages(p.name),
-                    format: getFormat(p.name),
-                    badge: getBadge(p.name),
-                    icon: getIcon(p.name)
+                    id: 7,
+                    stripeId: "prod_cheat",
+                    title: "Mixing EQ Cheat Sheet",
+                    category: "mixing",
+                    description: "Schnellreferenz für EQ-Einstellungen aller Instrumente. Sofort-Download nach Kauf.",
+                    price: 0.99,
+                    pages: "2 Seiten",
+                    format: "PDF",
+                    badge: "Neu",
+                    icon: "file-text"
                 }));
                 renderProducts('all');
                 document.getElementById('loader').classList.add('hidden');
