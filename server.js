@@ -18,7 +18,7 @@ const products = [
   {
     id: "prod_cheat",
     name: "Mixing EQ Cheat Sheet",
-    price: 99, // 0,99€ in cents
+    price: 10, // 0,10€ in cents
     description: "Schnellreferenz für EQ-Einstellungen aller Instrumente. PDF-Download."
   }
 ];
