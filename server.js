@@ -101,7 +101,7 @@ app.get('/api/products', (req, res) => {
 // API: Stripe Checkout Session erstellen
 app.post('/api/create-checkout-session', async (req, res) => {
   try {
-    const { items } = req.body;
+    const { items, customerEmail } = req.body;
     
     const lineItems = items.map(item => ({
       price_data: {
@@ -115,14 +115,24 @@ app.post('/api/create-checkout-session', async (req, res) => {
       quantity: 1,
     }));
 
-    const session = await stripe.checkout.sessions.create({
+    const sessionConfig = {
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
       success_url: `${req.headers.origin}/success.html?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.origin}/cancel.html`,
       automatic_tax: { enabled: true },
-    });
+    };
+
+    // Wenn E-Mail vom Frontend kommt, nutze sie
+    if (customerEmail) {
+      sessionConfig.customer_email = customerEmail;
+    } else {
+      // Sonst lässt Stripe den Kunden nach E-Mail fragen
+      sessionConfig.customer_creation = 'always';
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionConfig);
 
     res.json({ id: session.id });
   } catch (error) {

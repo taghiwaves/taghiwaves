@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+const response = await fetch('/api/create-checkout-session',<!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
@@ -745,28 +745,45 @@
             document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
         }
 
-        async function checkout() {
-            if (cart.length === 0) return;
-            
-            try {
-                const response = await fetch('/api/create-checkout-session', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        items: cart.map(item => ({
-                            name: item.title,
-                            price: Math.round(item.price * 100),
-                            description: item.description
-                        }))
-                    })
-                });
-                
-                const session = await response.json();
-                
-                if (session.error) {
-                    showToast('Fehler: ' + session.error);
-                    return;
-                }
+async function checkout() {
+  if (cart.length === 0) return;
+  
+  // E-Mail vom Kunden abfragen
+  const customerEmail = prompt('Bitte gib deine E-Mail-Adresse ein für den Download:');
+  
+  if (!customerEmail || !customerEmail.includes('@')) {
+    showToast('Bitte gib eine gültige E-Mail-Adresse ein.');
+    return;
+  }
+  
+  try {
+    const response = await fetch('/api/create-checkout-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        items: cart.map(item => ({
+          name: item.title,
+          price: Math.round(item.price * 100),
+          description: item.description
+        })),
+        customerEmail: customerEmail  // ← E-Mail wird mitgeschickt
+      })
+    });
+    
+    const session = await response.json();
+    
+    if (session.error) {
+      showToast('Fehler: ' + session.error);
+      return;
+    }
+    
+    stripe = Stripe('pk_live_...'); // Dein Publishable Key
+    await stripe.redirectToCheckout({ sessionId: session.id });
+    
+  } catch (error) {
+    showToast('Checkout-Fehler: ' + error.message);
+  }
+}
                 
                 stripe = Stripe('pk_live_51TJzoPCG1b2pY2XXHU9LFix07eRj1xl4q03YyAIK8GHLBcLYvlv4HBrHYWqmwHKeBbjaicHBcWWqGUay0SyBZO3y00C23aqVOP'); // Replace with your key
                 await stripe.redirectToCheckout({ sessionId: session.id });
