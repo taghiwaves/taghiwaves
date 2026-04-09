@@ -3,11 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>taghiwaves - Premium Musikproduktion Guides</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://js.stripe.com/v3/"></script>
+    
+    <!-- SEO Meta Tags -->
+    <title>taghiwaves - Premium Musikproduktion Guides | Mixing & Mastering Cheat Sheets</title>
+    <meta name="description" content="Professionelle Musikproduktion Guides, Mixing & Mastering Cheat Sheets, Templates und Workflows. Sofortiger Download nach dem Kauf. Für Produzenten jeden Levels.">
+    <meta name="keywords" content="Musikproduktion, Mixing, Mastering, Ableton, Cheat Sheet, Audio Engineering, Music Production, Templates">
+    <meta name="author" content="taghiwaves">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://taghiwaves.onrender.com">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://taghiwaves.onrender.com">
+    <meta property="og:title" content="taghiwaves - Premium Musikproduktion Guides">
+    <meta property="og:description" content="Meistere die Kunst des Mix & Mastering mit professionellen Cheat Sheets und Templates.">
+    <meta property="og:image" content="https://taghiwaves.onrender.com/assets/og-image.jpg">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://taghiwaves.onrender.com">
+    <meta property="twitter:title" content="taghiwaves - Premium Musikproduktion Guides">
+    <meta property="twitter:description" content="Professionelle Dokumente für Musikproduzenten. Sofortiger Download.">
+    <meta property="twitter:image" content="https://taghiwaves.onrender.com/assets/og-image.jpg">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300f0ff' stroke-width='2'%3E%3Cpath d='M2 10v3M6 6v11M10 3v18M14 8v7M18 5v13M22 9v5'/%3E%3C/svg%3E">
+    
+    <!-- Preconnect für Performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://js.stripe.com">
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    
+    <!-- Styles -->
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://js.stripe.com/v3/" async></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    
     <style>
         :root {
             --neon-cyan: #00f0ff;
@@ -50,6 +83,19 @@
             mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
         }
         
+        /* Skip Link für Accessibility */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--neon-cyan);
+            color: black;
+            padding: 8px;
+            text-decoration: none;
+            z-index: 100;
+        }
+        .skip-link:focus { top: 0; }
+        
         nav {
             position: fixed; top: 0; width: 100%; padding: 1.5rem 3rem;
             display: flex; justify-content: space-between; align-items: center;
@@ -64,6 +110,7 @@
             background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             display: flex; align-items: center; gap: 0.5rem;
+            text-decoration: none;
         }
         
         .nav-links { display: flex; gap: 2rem; align-items: center; }
@@ -84,12 +131,23 @@
         
         .nav-links a:hover::after { width: 100%; }
         
+        /* Mobile Menu Toggle */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+        
         .cart-btn {
             background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(184, 41, 221, 0.1));
             border: 1px solid rgba(0, 240, 255, 0.3); padding: 0.75rem 1.5rem;
             border-radius: 50px; color: white; cursor: pointer;
             display: flex; align-items: center; gap: 0.5rem;
             transition: all 0.3s; position: relative; overflow: hidden;
+            font-size: 0.875rem;
         }
         
         .cart-btn:hover {
@@ -145,9 +203,13 @@
             border: none; border-radius: 50px; color: white; font-weight: 600;
             font-size: 1rem; cursor: pointer; transition: all 0.3s;
             position: relative; overflow: hidden;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
         }
         
         .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 20px 40px rgba(0, 240, 255, 0.3); }
+        .btn-primary:focus-visible { outline: 2px solid var(--neon-cyan); outline-offset: 2px; }
         
         .btn-secondary {
             padding: 1rem 2.5rem; background: transparent;
@@ -257,12 +319,15 @@
             border: 1px solid rgba(0, 240, 255, 0.3); border-radius: 50px;
             color: white; cursor: pointer; display: flex; align-items: center;
             gap: 0.5rem; transition: all 0.3s; font-weight: 500;
+            font-size: 0.875rem;
         }
         
         .add-to-cart:hover {
             background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
             border-color: transparent; transform: scale(1.05);
         }
+        
+        .add-to-cart:focus-visible { outline: 2px solid var(--neon-cyan); outline-offset: 2px; }
         
         .cart-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -354,11 +419,88 @@
             border: none; border-radius: 12px; color: white; font-weight: 600;
             font-size: 1.125rem; cursor: pointer; transition: all 0.3s;
             display: flex; align-items: center; justify-content: center; gap: 0.75rem;
+            position: relative;
+            overflow: hidden;
         }
         
-        .checkout-btn:hover { transform: translateY(-2px); box-shadow: 0 20px 40px rgba(0, 240, 255, 0.3); }
-        
+        .checkout-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 20px 40px rgba(0, 240, 255, 0.3); }
         .checkout-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        
+        .checkout-btn .spinner {
+            width: 20px; height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* Email Modal */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); backdrop-filter: blur(5px);
+            z-index: 3000; opacity: 0; visibility: hidden; transition: all 0.3s;
+            display: flex; align-items: center; justify-content: center;
+            padding: 1rem;
+        }
+        
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        
+        .modal-content {
+            background: var(--card-bg);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 20px;
+            padding: 2.5rem;
+            max-width: 450px;
+            width: 100%;
+            transform: scale(0.9);
+            transition: transform 0.3s;
+            position: relative;
+        }
+        
+        .modal-overlay.active .modal-content { transform: scale(1); }
+        
+        .modal-close {
+            position: absolute; top: 1rem; right: 1rem;
+            background: none; border: none; color: rgba(255,255,255,0.5);
+            cursor: pointer; padding: 0.5rem; border-radius: 50%;
+            transition: all 0.2s;
+        }
+        
+        .modal-close:hover { color: white; background: rgba(255,255,255,0.1); }
+        
+        .modal-title {
+            font-size: 1.5rem; margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        
+        .modal-text { color: rgba(255,255,255,0.6); margin-bottom: 1.5rem; font-size: 0.9375rem; }
+        
+        .form-group { margin-bottom: 1.5rem; }
+        
+        .form-label {
+            display: block; margin-bottom: 0.5rem; color: rgba(255,255,255,0.8);
+            font-size: 0.875rem; font-weight: 500;
+        }
+        
+        .form-input {
+            width: 100%; padding: 1rem; background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
+            color: white; font-size: 1rem; transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none; border-color: var(--neon-cyan);
+            box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.1);
+        }
+        
+        .form-input::placeholder { color: rgba(255,255,255,0.3); }
+        
+        .error-message {
+            color: #ff006e; font-size: 0.875rem; margin-top: 0.5rem; display: none;
+        }
         
         .features { padding: 6rem 2rem; background: rgba(0,0,0,0.3); border-top: 1px solid rgba(255,255,255,0.05); }
         
@@ -424,21 +566,51 @@
             animation: spin 1s linear infinite; margin-bottom: 1rem;
         }
         
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .error-state {
+            text-align: center; padding: 3rem; color: rgba(255,255,255,0.6);
+        }
         
-        .loader p { color: rgba(255,255,255,0.6); font-family: 'Space Grotesk', sans-serif; }
+        .error-state button {
+            margin-top: 1rem; padding: 0.75rem 1.5rem;
+            background: rgba(0, 240, 255, 0.1); border: 1px solid var(--neon-cyan);
+            color: white; border-radius: 8px; cursor: pointer; transition: all 0.3s;
+        }
+        
+        .error-state button:hover { background: rgba(0, 240, 255, 0.2); }
         
         @media (max-width: 768px) {
             nav { padding: 1rem; }
             .nav-links { display: none; }
+            .mobile-menu-btn { display: block; }
             .hero h1 { font-size: 2.5rem; }
             .products-grid { grid-template-columns: 1fr; }
             .cart-sidebar { width: 100%; }
+            
+            /* Mobile Menu */
+            .nav-links.mobile-open {
+                display: flex; flex-direction: column;
+                position: absolute; top: 100%; left: 0; right: 0;
+                background: rgba(10, 10, 15, 0.95);
+                padding: 2rem; gap: 1.5rem;
+                border-top: 1px solid rgba(255,255,255,0.1);
+            }
+        }
+        
+        /* Reduced Motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="loader" id="loader">
+    <!-- Skip to content für Accessibility -->
+    <a href="#main-content" class="skip-link">Zum Hauptinhalt springen</a>
+
+    <div class="loader" id="loader" role="status" aria-live="polite">
         <div class="loader-content">
             <div class="loader-spinner"></div>
             <p>taghiwaves wird geladen...</p>
@@ -448,96 +620,112 @@
     <div class="bg-gradient"></div>
     <div class="grid-overlay"></div>
 
-    <nav>
-        <div class="logo">
-            <i data-lucide="audio-waveform"></i>
+    <nav role="navigation" aria-label="Hauptnavigation">
+        <a href="/" class="logo" aria-label="taghiwaves Startseite">
+            <i data-lucide="audio-waveform" aria-hidden="true"></i>
             taghiwaves
-        </div>
-        <div class="nav-links">
+        </a>
+        
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Menü öffnen" aria-expanded="false" aria-controls="navLinks">
+            <i data-lucide="menu" aria-hidden="true"></i>
+        </button>
+
+        <div class="nav-links" id="navLinks">
             <a href="#products">Dokumente</a>
             <a href="#features">Vorteile</a>
             <a href="#about">Über mich</a>
         </div>
-        <button class="cart-btn" onclick="toggleCart()">
-            <i data-lucide="shopping-cart"></i>
+        
+        <button class="cart-btn" onclick="toggleCart()" aria-label="Warenkorb öffnen" aria-haspopup="dialog" aria-expanded="false" aria-controls="cartSidebar" id="cartToggle">
+            <i data-lucide="shopping-cart" aria-hidden="true"></i>
             <span>Warenkorb</span>
-            <span class="cart-count" id="cartCount">0</span>
+            <span class="cart-count" id="cartCount" aria-live="polite" style="display: none;">0</span>
         </button>
     </nav>
 
-    <section class="hero">
-        <div class="hero-content">
-            <div class="hero-badge">
-                <i data-lucide="sparkles" style="width: 16px; height: 16px;"></i>
-                Premium Musikproduktion Guides
+    <main id="main-content">
+        <section class="hero" aria-labelledby="hero-title">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <i data-lucide="sparkles" style="width: 16px; height: 16px;" aria-hidden="true"></i>
+                    Premium Musikproduktion Guides
+                </div>
+                <h1 id="hero-title">Meistere die Kunst des <span>Mix & Mastering</span></h1>
+                <p>Professionelle Dokumente, Templates und Workflows für Produzenten, die ihren Sound auf das nächste Level bringen wollen.</p>
+                <div class="hero-cta">
+                    <button class="btn-primary" onclick="scrollToProducts()">
+                        Dokumente entdecken
+                        <i data-lucide="arrow-down" style="width: 18px; height: 18px; margin-left: 0.5rem;" aria-hidden="true"></i>
+                    </button>
+                    <button class="btn-secondary" onclick="showPreview()">
+                        <i data-lucide="play-circle" style="width: 18px; height: 18px; margin-right: 0.5rem;" aria-hidden="true"></i>
+                        Vorschau ansehen
+                    </button>
+                </div>
             </div>
-            <h1>Meistere die Kunst des <span>Mix & Mastering</span></h1>
-            <p>Professionelle Dokumente, Templates und Workflows für Produzenten, die ihren Sound auf das nächste Level bringen wollen.</p>
-            <div class="hero-cta">
-                <button class="btn-primary" onclick="scrollToProducts()">
-                    Dokumente entdecken
-                    <i data-lucide="arrow-down" style="width: 18px; height: 18px; margin-left: 0.5rem;"></i>
-                </button>
-                <button class="btn-secondary" onclick="showPreview()">
-                    <i data-lucide="play-circle" style="width: 18px; height: 18px; margin-right: 0.5rem;"></i>
-                    Vorschau ansehen
-                </button>
+        </section>
+
+        <section class="products" id="products" aria-labelledby="products-title">
+            <div class="section-header">
+                <h2 id="products-title">Premium Dokumente</h2>
+                <p>Wähle aus professionellen Guides für jeden Skill-Level</p>
             </div>
-        </div>
-    </section>
 
-    <section class="products" id="products">
-        <div class="section-header">
-            <h2>Premium Dokumente</h2>
-            <p>Wähle aus professionellen Guides für jeden Skill-Level</p>
-        </div>
-
-        <div class="filters">
-            <button class="filter-btn active" onclick="filterProducts('all')">Alle</button>
-            <button class="filter-btn" onclick="filterProducts('mixing')">Mixing</button>
-            <button class="filter-btn" onclick="filterProducts('mastering')">Mastering</button>
-            <button class="filter-btn" onclick="filterProducts('production')">Produktion</button>
-            <button class="filter-btn" onclick="filterProducts('templates')">Templates</button>
-        </div>
-
-        <div class="products-grid" id="productsGrid"></div>
-    </section>
-
-    <section class="features" id="features">
-        <div class="features-grid">
-            <div class="feature">
-                <div class="feature-icon"><i data-lucide="download"></i></div>
-                <h3>Sofortiger Download</h3>
-                <p>Direkter Zugriff auf alle Dokumente nach dem Kauf. Keine Wartezeit, sofort loslegen.</p>
+            <div class="filters" role="tablist" aria-label="Produktkategorien">
+                <button class="filter-btn active" onclick="filterProducts('all')" role="tab" aria-selected="true" tabindex="0">Alle</button>
+                <button class="filter-btn" onclick="filterProducts('mixing')" role="tab" aria-selected="false" tabindex="-1">Mixing</button>
+                <button class="filter-btn" onclick="filterProducts('mastering')" role="tab" aria-selected="false" tabindex="-1">Mastering</button>
+                <button class="filter-btn" onclick="filterProducts('production')" role="tab" aria-selected="false" tabindex="-1">Produktion</button>
+                <button class="filter-btn" onclick="filterProducts('templates')" role="tab" aria-selected="false" tabindex="-1">Templates</button>
             </div>
-            <div class="feature">
-                <div class="feature-icon"><i data-lucide="refresh-ccw"></i></div>
-                <h3>Lebenslange Updates</h3>
-                <p>Alle Dokumente werden regelmäßig aktualisiert. Einmal kaufen, immer aktuell bleiben.</p>
-            </div>
-            <div class="feature">
-                <div class="feature-icon"><i data-lucide="shield-check"></i></div>
-                <h3>Sichere Zahlung</h3>
-                <p>SSL-verschlüsselte Transaktionen über Stripe. 30 Tage Geld-zurück-Garantie.</p>
-            </div>
-        </div>
-    </section>
 
-    <footer id="about">
+            <div class="products-grid" id="productsGrid">
+                <div class="error-state" style="grid-column: 1/-1;">
+                    <i data-lucide="loader-2" style="width: 48px; height: 48px; opacity: 0.5; animation: spin 1s linear infinite;"></i>
+                    <p>Produkte werden geladen...</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="features" id="features" aria-labelledby="features-title">
+            <div class="features-grid">
+                <article class="feature">
+                    <div class="feature-icon" aria-hidden="true"><i data-lucide="download"></i></div>
+                    <h3>Sofortiger Download</h3>
+                    <p>Direkter Zugriff auf alle Dokumente nach dem Kauf. Keine Wartezeit, sofort loslegen.</p>
+                </article>
+                <article class="feature">
+                    <div class="feature-icon" aria-hidden="true"><i data-lucide="refresh-ccw"></i></div>
+                    <h3>Lebenslange Updates</h3>
+                    <p>Alle Dokumente werden regelmäßig aktualisiert. Einmal kaufen, immer aktuell bleiben.</p>
+                </article>
+                <article class="feature">
+                    <div class="feature-icon" aria-hidden="true"><i data-lucide="shield-check"></i></div>
+                    <h3>Sichere Zahlung</h3>
+                    <p>SSL-verschlüsselte Transaktionen über Stripe. 30 Tage Geld-zurück-Garantie.</p>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <footer id="about" role="contentinfo">
         <div class="footer-logo">taghiwaves</div>
         <p>© 2026 taghiwaves. Alle Rechte vorbehalten.</p>
         <p style="margin-top: 0.5rem; font-size: 0.875rem;">Kontakt: hello@taghiwaves.com</p>
     </footer>
 
-    <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
-    <div class="cart-sidebar" id="cartSidebar">
+    <!-- Warenkorb Sidebar -->
+    <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()" aria-hidden="true"></div>
+    <aside class="cart-sidebar" id="cartSidebar" role="dialog" aria-modal="true" aria-labelledby="cart-heading">
         <div class="cart-header">
-            <h3><i data-lucide="shopping-bag"></i> Dein Warenkorb</h3>
-            <button class="close-cart" onclick="toggleCart()"><i data-lucide="x"></i></button>
+            <h3 id="cart-heading"><i data-lucide="shopping-bag" aria-hidden="true"></i> Dein Warenkorb</h3>
+            <button class="close-cart" onclick="toggleCart()" aria-label="Warenkorb schließen">
+                <i data-lucide="x" aria-hidden="true"></i>
+            </button>
         </div>
-        <div class="cart-items" id="cartItems">
+        <div class="cart-items" id="cartItems" role="list" aria-label="Warenkorb Artikel">
             <div class="cart-empty">
-                <i data-lucide="shopping-cart"></i>
+                <i data-lucide="shopping-cart" aria-hidden="true"></i>
                 <p>Dein Warenkorb ist leer</p>
             </div>
         </div>
@@ -546,35 +734,142 @@
                 <span>Gesamtsumme</span>
                 <span id="cartTotal">€0.00</span>
             </div>
-            <button class="checkout-btn" id="checkoutBtn" disabled onclick="checkout()">
-                <i data-lucide="credit-card"></i> Zur Kasse
+            <button class="checkout-btn" id="checkoutBtn" disabled onclick="openEmailModal()">
+                <i data-lucide="credit-card" aria-hidden="true"></i> 
+                <span class="btn-text">Zur Kasse</span>
             </button>
+        </div>
+    </aside>
+
+    <!-- Email Modal -->
+    <div class="modal-overlay" id="emailModal" role="dialog" aria-modal="true" aria-labelledby="email-modal-title">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeEmailModal()" aria-label="Schließen">
+                <i data-lucide="x" aria-hidden="true"></i>
+            </button>
+            <h2 class="modal-title" id="email-modal-title">Fast fertig!</h2>
+            <p class="modal-text">Gib deine E-Mail-Adresse ein, um den Download-Link nach dem Kauf zu erhalten.</p>
+            
+            <form id="emailForm" onsubmit="handleEmailSubmit(event)">
+                <div class="form-group">
+                    <label class="form-label" for="emailInput">E-Mail-Adresse</label>
+                    <input 
+                        type="email" 
+                        id="emailInput" 
+                        class="form-input" 
+                        placeholder="deine@email.de" 
+                        required
+                        autocomplete="email"
+                    >
+                    <div class="error-message" id="emailError" role="alert"></div>
+                </div>
+                <button type="submit" class="checkout-btn" id="submitEmailBtn">
+                    Weiter zur Zahlung
+                </button>
+            </form>
         </div>
     </div>
 
-    <div class="toast" id="toast">
-        <i data-lucide="check-circle"></i>
+    <!-- Toast Notification -->
+    <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true">
+        <i data-lucide="check-circle" aria-hidden="true"></i>
         <span id="toastMessage">Zum Warenkorb hinzugefügt!</span>
     </div>
 
     <script>
+        // Konfiguration
+        const CONFIG = {
+            // WICHTIG: In Produktion sollte dies vom Server kommen!
+            STRIPE_PUBLIC_KEY: 'pk_live_51TJzoPCG1b2pY2XXHU9LFix07eRj1xl4q03YyAIK8GHLBcLYvlv4HBrHYWqmwHKeBbjaicHBcWWqGUay0SyBZO3y00C23aqVOP',
+            API_BASE_URL: '' // Leer für relative URLs
+        };
+
         let stripe;
         let products = [];
         let cart = [];
+        let isProcessing = false;
+
+        // XSS Schutz
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
+            
+            // Stripe initialisieren
+            if (window.Stripe) {
+                stripe = Stripe(CONFIG.STRIPE_PUBLIC_KEY);
+            }
+            
+            // Warenkorb aus LocalStorage laden
+            loadCart();
+            
+            // Produkte laden
             fetchProducts();
             
+            // Event Listener
+            setupEventListeners();
+            
+            // Loader ausblenden
             setTimeout(() => {
                 document.getElementById('loader').classList.add('hidden');
-            }, 1500);
+            }, 800);
         });
+
+        function setupEventListeners() {
+            // ESC zum Schließen
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeAllModals();
+                }
+            });
+
+            // Focus Trap für Modals
+            setupFocusTrap('cartSidebar', 'cartToggle');
+            setupFocusTrap('emailModal', 'checkoutBtn');
+        }
+
+        function setupFocusTrap(modalId, triggerId) {
+            const modal = document.getElementById(modalId);
+            const trigger = document.getElementById(triggerId);
+            
+            modal.addEventListener('keydown', (e) => {
+                if (e.key === 'Tab') {
+                    const focusableElements = modal.querySelectorAll(
+                        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                    );
+                    const firstFocusable = focusableElements[0];
+                    const lastFocusable = focusableElements[focusableElements.length - 1];
+
+                    if (e.shiftKey && document.activeElement === firstFocusable) {
+                        lastFocusable.focus();
+                        e.preventDefault();
+                    } else if (!e.shiftKey && document.activeElement === lastFocusable) {
+                        firstFocusable.focus();
+                        e.preventDefault();
+                    }
+                }
+            });
+        }
+
+        function closeAllModals() {
+            const cartSidebar = document.getElementById('cartSidebar');
+            if (cartSidebar.classList.contains('active')) {
+                toggleCart();
+            }
+            closeEmailModal();
+        }
 
         async function fetchProducts() {
             try {
                 const response = await fetch('/api/products');
+                if (!response.ok) throw new Error('Netzwerkfehler');
+                
                 const data = await response.json();
                 products = data.map((p, index) => ({
                     id: index + 1,
@@ -588,9 +883,18 @@
                     badge: getBadge(p.name),
                     icon: getIcon(p.name)
                 }));
+                
                 renderProducts('all');
             } catch (error) {
                 console.error('Fehler beim Laden der Produkte:', error);
+                document.getElementById('productsGrid').innerHTML = `
+                    <div class="error-state" style="grid-column: 1/-1;">
+                        <i data-lucide="alert-circle" style="width: 48px; height: 48px; opacity: 0.5;"></i>
+                        <p>Produkte konnten nicht geladen werden.</p>
+                        <button onclick="fetchProducts()">Erneut versuchen</button>
+                    </div>
+                `;
+                lucide.createIcons();
             }
         }
 
@@ -638,38 +942,48 @@
             const grid = document.getElementById('productsGrid');
             const filtered = filter === 'all' ? products : products.filter(p => p.category === filter);
             
+            if (filtered.length === 0) {
+                grid.innerHTML = '<div class="error-state" style="grid-column: 1/-1;"><p>Keine Produkte in dieser Kategorie.</p></div>';
+                return;
+            }
+            
             grid.innerHTML = filtered.map(product => `
-                <div class="product-card" data-category="${product.category}">
+                <article class="product-card" data-category="${escapeHtml(product.category)}">
                     <div class="product-image">
-                        <i data-lucide="${product.icon}"></i>
-                        ${product.badge ? `<span class="product-badge">${product.badge}</span>` : ''}
+                        <i data-lucide="${escapeHtml(product.icon)}" aria-hidden="true"></i>
+                        ${product.badge ? `<span class="product-badge">${escapeHtml(product.badge)}</span>` : ''}
                     </div>
                     <div class="product-content">
-                        <div class="product-category">${product.category}</div>
-                        <h3 class="product-title">${product.title}</h3>
-                        <p class="product-description">${product.description}</p>
+                        <div class="product-category">${escapeHtml(product.category)}</div>
+                        <h3 class="product-title">${escapeHtml(product.title)}</h3>
+                        <p class="product-description">${escapeHtml(product.description)}</p>
                         <div class="product-meta">
-                            <span><i data-lucide="file-text" style="width: 14px; height: 14px;"></i> ${product.pages}</span>
-                            <span><i data-lucide="download" style="width: 14px; height: 14px;"></i> ${product.format}</span>
+                            <span><i data-lucide="file-text" style="width: 14px; height: 14px;" aria-hidden="true"></i> ${escapeHtml(product.pages)}</span>
+                            <span><i data-lucide="download" style="width: 14px; height: 14px;" aria-hidden="true"></i> ${escapeHtml(product.format)}</span>
                         </div>
                         <div class="product-footer">
                             <div class="product-price">€${product.price.toFixed(2)}</div>
-                            <button class="add-to-cart" onclick="addToCart(${product.id})">
-                                <i data-lucide="shopping-cart" style="width: 16px; height: 16px;"></i> In den Warenkorb
+                            <button class="add-to-cart" onclick="addToCart(${product.id})" aria-label="${escapeHtml(product.title)} in den Warenkorb legen">
+                                <i data-lucide="shopping-cart" style="width: 16px; height: 16px;" aria-hidden="true"></i> In den Warenkorb
                             </button>
                         </div>
                     </div>
-                </div>
+                </article>
             `).join('');
             
             lucide.createIcons();
         }
 
         function filterProducts(category) {
+            // Accessibility: Update aria-selected
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.classList.remove('active');
+                btn.setAttribute('aria-selected', 'false');
+                btn.setAttribute('tabindex', '-1');
                 if (btn.textContent.toLowerCase().includes(category) || (category === 'all' && btn.textContent === 'Alle')) {
                     btn.classList.add('active');
+                    btn.setAttribute('aria-selected', 'true');
+                    btn.setAttribute('tabindex', '0');
                 }
             });
             
@@ -685,16 +999,40 @@
             }, 200);
         }
 
+        // Warenkorb Funktionen mit LocalStorage
+        function loadCart() {
+            try {
+                const saved = localStorage.getItem('taghiwaves_cart');
+                if (saved) {
+                    cart = JSON.parse(saved);
+                    updateCartUI(false); // false = nicht speichern ( bereits geladen )
+                }
+            } catch (e) {
+                console.error('LocalStorage nicht verfügbar');
+            }
+        }
+
+        function saveCart() {
+            try {
+                localStorage.setItem('taghiwaves_cart', JSON.stringify(cart));
+            } catch (e) {
+                console.error('Konnte Warenkorb nicht speichern');
+            }
+        }
+
         function addToCart(productId) {
             const product = products.find(p => p.id === productId);
+            if (!product) return;
+            
             if (cart.find(item => item.id === productId)) {
-                showToast(`${product.title} ist bereits im Warenkorb!`);
+                showToast(`${escapeHtml(product.title)} ist bereits im Warenkorb!`);
                 return;
             }
             
             cart.push(product);
-            updateCartUI();
-            showToast(`${product.title} wurde hinzugefügt!`);
+            saveCart();
+            updateCartUI(false);
+            showToast(`${escapeHtml(product.title)} wurde hinzugefügt!`);
             
             const cartBtn = document.querySelector('.cart-btn');
             cartBtn.style.transform = 'scale(1.2)';
@@ -703,10 +1041,13 @@
 
         function removeFromCart(productId) {
             cart = cart.filter(item => item.id !== productId);
-            updateCartUI();
+            saveCart();
+            updateCartUI(false);
         }
 
-        function updateCartUI() {
+        function updateCartUI(save = true) {
+            if (save) saveCart();
+            
             const cartCount = document.getElementById('cartCount');
             const cartItems = document.getElementById('cartItems');
             const cartTotal = document.getElementById('cartTotal');
@@ -715,6 +1056,7 @@
             if (cart.length > 0) {
                 cartCount.textContent = cart.length;
                 cartCount.style.display = 'flex';
+                cartCount.setAttribute('aria-label', `${cart.length} Artikel im Warenkorb`);
             } else {
                 cartCount.style.display = 'none';
             }
@@ -722,21 +1064,21 @@
             if (cart.length === 0) {
                 cartItems.innerHTML = `
                     <div class="cart-empty">
-                        <i data-lucide="shopping-cart"></i>
+                        <i data-lucide="shopping-cart" aria-hidden="true"></i>
                         <p>Dein Warenkorb ist leer</p>
                     </div>
                 `;
                 checkoutBtn.disabled = true;
             } else {
                 cartItems.innerHTML = cart.map(item => `
-                    <div class="cart-item">
-                        <div class="cart-item-image"><i data-lucide="${item.icon}"></i></div>
+                    <div class="cart-item" role="listitem">
+                        <div class="cart-item-image" aria-hidden="true"><i data-lucide="${escapeHtml(item.icon)}"></i></div>
                         <div class="cart-item-details">
-                            <div class="cart-item-title">${item.title}</div>
+                            <div class="cart-item-title">${escapeHtml(item.title)}</div>
                             <div class="cart-item-price">€${item.price.toFixed(2)}</div>
                         </div>
-                        <button class="remove-item" onclick="removeFromCart(${item.id})">
-                            <i data-lucide="trash-2" style="width: 18px; height: 18px;"></i>
+                        <button class="remove-item" onclick="removeFromCart(${item.id})" aria-label="${escapeHtml(item.title)} entfernen">
+                            <i data-lucide="trash-2" style="width: 18px; height: 18px;" aria-hidden="true"></i>
                         </button>
                     </div>
                 `).join('');
@@ -752,21 +1094,97 @@
         function toggleCart() {
             const overlay = document.getElementById('cartOverlay');
             const sidebar = document.getElementById('cartSidebar');
+            const cartToggle = document.getElementById('cartToggle');
+            
+            const isOpen = sidebar.classList.contains('active');
+            
             overlay.classList.toggle('active');
             sidebar.classList.toggle('active');
-            document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+            
+            // Accessibility
+            cartToggle.setAttribute('aria-expanded', !isOpen);
+            document.body.style.overflow = !isOpen ? 'hidden' : '';
+            
+            // Focus Management
+            if (!isOpen) {
+                setTimeout(() => {
+                    document.querySelector('.close-cart').focus();
+                }, 100);
+            } else {
+                cartToggle.focus();
+            }
         }
 
-        async function checkout() {
+        function toggleMobileMenu() {
+            const navLinks = document.getElementById('navLinks');
+            const btn = document.querySelector('.mobile-menu-btn');
+            const isOpen = navLinks.classList.contains('mobile-open');
+            
+            navLinks.classList.toggle('mobile-open');
+            btn.setAttribute('aria-expanded', !isOpen);
+            
+            if (!isOpen) {
+                // Schließen bei Klick außerhalb
+                setTimeout(() => {
+                    document.addEventListener('click', closeMobileMenuOutside);
+                }, 100);
+            }
+        }
+
+        function closeMobileMenuOutside(e) {
+            const nav = document.querySelector('nav');
+            if (!nav.contains(e.target)) {
+                document.getElementById('navLinks').classList.remove('mobile-open');
+                document.querySelector('.mobile-menu-btn').setAttribute('aria-expanded', 'false');
+                document.removeEventListener('click', closeMobileMenuOutside);
+            }
+        }
+
+        // Email Modal
+        function openEmailModal() {
             if (cart.length === 0) return;
+            document.getElementById('emailModal').classList.add('active');
+            setTimeout(() => document.getElementById('emailInput').focus(), 100);
+        }
+
+        function closeEmailModal() {
+            document.getElementById('emailModal').classList.remove('active');
+            document.getElementById('emailError').style.display = 'none';
+            document.getElementById('emailInput').value = '';
+        }
+
+        async function handleEmailSubmit(e) {
+            e.preventDefault();
+            if (isProcessing) return;
             
-            // E-Mail vom Kunden abfragen
-            const customerEmail = prompt('Bitte gib deine E-Mail-Adresse ein für den Download:');
+            const emailInput = document.getElementById('emailInput');
+            const email = emailInput.value.trim();
+            const errorEl = document.getElementById('emailError');
             
-            if (!customerEmail || !customerEmail.includes('@')) {
-                showToast('Bitte gib eine gültige E-Mail-Adresse ein.');
+            // Validierung
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                errorEl.textContent = 'Bitte gib eine gültige E-Mail-Adresse ein.';
+                errorEl.style.display = 'block';
+                emailInput.setAttribute('aria-invalid', 'true');
                 return;
             }
+            
+            errorEl.style.display = 'none';
+            emailInput.setAttribute('aria-invalid', 'false');
+            
+            // Checkout starten
+            await checkout(email);
+        }
+
+        async function checkout(customerEmail) {
+            if (isProcessing || cart.length === 0) return;
+            
+            isProcessing = true;
+            const btn = document.getElementById('submitEmailBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<div class="spinner"></div> Wird bearbeitet...';
+            btn.disabled = true;
             
             try {
                 const response = await fetch('/api/create-checkout-session', {
@@ -785,15 +1203,24 @@
                 const session = await response.json();
                 
                 if (session.error) {
-                    showToast('Fehler: ' + session.error);
-                    return;
+                    throw new Error(session.error);
                 }
                 
-                stripe = Stripe('pk_live_51TJzoPCG1b2pY2XXHU9LFix07eRj1xl4q03YyAIK8GHLBcLYvlv4HBrHYWqmwHKeBbjaicHBcWWqGUay0SyBZO3y00C23aqVOP');
-                await stripe.redirectToCheckout({ sessionId: session.id });
+                // Zu Stripe weiterleiten
+                const result = await stripe.redirectToCheckout({ sessionId: session.id });
+                
+                if (result.error) {
+                    throw new Error(result.error.message);
+                }
                 
             } catch (error) {
-                showToast('Checkout-Fehler: ' + error.message);
+                console.error('Checkout Fehler:', error);
+                showToast('Fehler beim Checkout: ' + escapeHtml(error.message));
+                
+                // Button zurücksetzen
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                isProcessing = false;
             }
         }
 
@@ -802,7 +1229,14 @@
             const toastMessage = document.getElementById('toastMessage');
             toastMessage.textContent = message;
             toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
+            
+            // Screen Reader Support
+            toast.setAttribute('role', 'alert');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                toast.removeAttribute('role');
+            }, 3000);
         }
 
         function scrollToProducts() {
@@ -813,11 +1247,12 @@
             showToast('Vorschau wird geladen...');
         }
 
+        // Smooth Scroll für Anchor Links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
                 const target = document.querySelector(this.getAttribute('href'));
-                if (target) target.scrollIntoView({ behavior: 'smooth' });
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
         });
     </script>
