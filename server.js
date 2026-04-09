@@ -58,7 +58,7 @@ app.post('/api/webhook', express.raw({type: 'application/json'}), async (req, re
         html: `
           <h1>Vielen Dank für deinen Kauf!</h1>
           <p>Du hast <strong>Mixing EQ Cheat Sheet</strong> erfolgreich gekauft.</p>
-          <p><a href="https://taghiwaves.onrender.com/downloads/mixing-eq-guide.pdf" 
+          <p><a href="https://taghiwaves.onrender.com/api/download/mixing-eq-guide?session_id=${session.id}" 
                 style="background:#00f0ff; color:#000; padding:12px 24px; text-decoration:none; border-radius:8px; display:inline-block; margin:20px 0;">
                 Jetzt herunterladen
              </a></p>
