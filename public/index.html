@@ -784,42 +784,59 @@
             API_BASE_URL: '' // Leer für relative URLs
         };
 
-        let stripe;
-        let products = [];
-        let cart = [];
-        let isProcessing = false;
+        // GANZ AM ANFANG DES SCRIPTS (nach let cart = []):
+let stripe = null;
+let stripeInitialized = false;
 
-        // XSS Schutz
-        function escapeHtml(text) {
-            if (!text) return '';
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
+// IN DER DOMContentLoaded Funktion:
+document.addEventListener('DOMContentLoaded', () => {
+    lucide.createIcons();
+    
+    // Stripe initialisieren mit Retry-Logik
+    initializeStripe();
+    
+    // Rest deines Codes...
+    fetchProducts();
+    loadCart();
+    setupEventListeners();
+    
+    setTimeout(() => {
+        document.getElementById('loader').classList.add('hidden');
+    }, 800);
+});
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            lucide.createIcons();
-            
-            // Stripe initialisieren
-            if (window.Stripe) {
-                stripe = Stripe(CONFIG.STRIPE_PUBLIC_KEY);
-            }
-            
-            // Warenkorb aus LocalStorage laden
-            loadCart();
-            
-            // Produkte laden
-            fetchProducts();
-            
-            // Event Listener
-            setupEventListeners();
-            
-            // Loader ausblenden
-            setTimeout(() => {
-                document.getElementById('loader').classList.add('hidden');
-            }, 800);
-        });
+// NEUE FUNKTION für Stripe-Initialisierung:
+function initializeStripe() {
+    if (!window.Stripe) {
+        console.error('Stripe.js nicht geladen. Warte...');
+        setTimeout(initializeStripe, 500);
+        return;
+    }
+    
+    try {
+        stripe = Stripe(CONFIG.STRIPE_PUBLIC_KEY);
+        stripeInitialized = true;
+        console.log('✅ Stripe initialisiert');
+    } catch (error) {
+        console.error('❌ Stripe Fehler:', error);
+        showToast('Fehler beim Laden des Zahlungssystems. Bitte Seite neu laden.');
+    }
+}
+
+// IN DER CHECKOUT FUNKTION (Zeile ~578):
+async function checkout(customerEmail) {
+    // WICHTIG: Prüfen ob Stripe bereit ist!
+    if (!stripeInitialized || !stripe) {
+        showToast('Zahlungssystem wird initialisiert... Bitte warte einen Moment.');
+        return;
+    }
+    
+    if (cart.length === 0) return;
+    if (isProcessing) return;
+    
+    isProcessing = true;
+    // ... Rest der Funktion bleibt gleich
+}
 
         function setupEventListeners() {
             // ESC zum Schließen
