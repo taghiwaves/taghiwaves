@@ -3,6 +3,8 @@ const express = require('express');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const cors = require('cors');
 const path = require('path');
+const { Resend } = require('resend');
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -99,10 +101,32 @@ app.post('/api/webhook', express.raw({type: 'application/json'}), async (req, re
   }
 
   if (event.type === 'checkout.session.completed') {
-    const session = event.data.object;
-    // Hier: E-Mail mit Download-Link senden
-    console.log('Payment successful!', session);
+  const session = event.data.object;
+  console.log('✅ Zahlung erfolgreich:', session.customer_email);
+  
+  // E-Mail senden
+  try {
+    await resend.emails.send({
+      from: process.env.FROM_EMAIL,
+      to: session.customer_email,
+      subject: 'Dein taghiwaves Download ist bereit!',
+      html: `
+        <h1>Vielen Dank für deinen Kauf!</h1>
+        <p>Du hast <strong>Mixing EQ Cheat Sheet</strong> erfolgreich gekauft.</p>
+        <p><a href="https://taghiwaves.onrender.com/downloads/mixing-eq-guide.pdf" 
+              style="background:#00f0ff; color:#000; padding:12px 24px; text-decoration:none; border-radius:8px; display:inline-block; margin:20px 0;">
+              Jetzt herunterladen
+           </a></p>
+        <p>Bei Fragen antworte einfach auf diese E-Mail.</p>
+        <br>
+        <p>taghiwaves Team</p>
+      `
+    });
+    console.log('📧 E-Mail gesendet an:', session.customer_email);
+  } catch (error) {
+    console.error('❌ E-Mail Fehler:', error);
   }
+}
 
   res.json({received: true});
 });
