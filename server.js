@@ -23,6 +23,8 @@ const products = [
   }
 ];
 
+console.log("🔥 WEBHOOK RECEIVED:", event.type);
+
 // WEBHOOK zuerst (roher Body, kein express.json() davor!)
 app.post('/api/webhook', express.raw({type: 'application/json'}), async (req, res) => {
   const sig = req.headers['stripe-signature'];
@@ -37,8 +39,40 @@ app.post('/api/webhook', express.raw({type: 'application/json'}), async (req, re
   }
 
   if (event.type === 'checkout.session.completed') {
-    const session = event.data.object;
-    console.log('✅ Zahlung erfolgreich:', session.customer_email);
+  const session = event.data.object;
+
+  const email =
+    session.customer_details?.email ||
+    session.customer_email;
+
+  console.log("✅ Zahlung erfolgreich");
+  console.log("📨 Email:", email);
+
+  if (!email) {
+    console.log("❌ Keine Email vorhanden");
+    return res.json({ received: true });
+  }
+
+  try {
+    await resend.emails.send({
+      from: process.env.FROM_EMAIL,
+      to: email,
+      subject: 'Dein taghiwaves Download ist bereit!',
+      html: `<h1>Download bereit</h1>`
+    });
+
+    console.log("📧 Email gesendet!");
+  } catch (err) {
+    console.error("❌ Email Fehler:", err);
+  }
+}
+
+console.log("📨 Käufer Email:", email);
+
+if (!email) {
+  console.log("❌ Keine Email gefunden!");
+  return res.json({ received: true });
+}
     
     // E-Mail senden
     try {
