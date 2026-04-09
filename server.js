@@ -33,7 +33,6 @@ app.post('/api/webhook', express.raw({type: 'application/json'}), async (req, re
     event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
   } catch (err) {
     console.error('Webhook Error:', err.message);
-    // HIER WAR DER FEHLER - korrigiert:
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
@@ -80,8 +79,8 @@ app.post('/api/webhook', express.raw({type: 'application/json'}), async (req, re
 // ERST DANACH json parser für API Routes
 app.use(express.json());
 
-// Sichere Download-Route
-app.get('/api/download/:productId', async (req, res) => {
+// Sichere Download-Route - KORRIGIERT für success.html
+app.get('/api/download/mixing-eq-guide', async (req, res) => {
   const sessionId = req.query.session_id;
   
   if (!sessionId) {
@@ -99,6 +98,7 @@ app.get('/api/download/:productId', async (req, res) => {
     res.download(filePath, 'Mixing-EQ-Cheat-Sheet.pdf');
     
   } catch (error) {
+    console.error('Download-Fehler:', error);
     res.status(500).send('Download-Fehler: ' + error.message);
   }
 });
