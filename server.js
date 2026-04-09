@@ -1,16 +1,30 @@
 require('dotenv').config();
+
+// Pflicht-Umgebungsvariablen prüfen
+const required = ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET', 'RESEND_API_KEY', 'FROM_EMAIL'];
+required.forEach(key => {
+  if (!process.env[key]) throw new Error(`Fehlende Umgebungsvariable: ${key}`);
+});
+
 const express = require('express');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const cors = require('cors');
 const path = require('path');
 const { Resend } = require('resend');
 const resend = new Resend(process.env.RESEND_API_KEY);
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 Minuten
+  max: 20,
+  message: { error: 'Zu viele Anfragen. Bitte versuche es später erneut.' }
+});
+
 // WICHTIG: Webhook muss VOR express.json() kommen!
-app.use(cors());
+app.use(cors({ origin: 'https://taghiwaves.onrender.com' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Produkte (in Produktion: Datenbank)
@@ -80,7 +94,7 @@ app.post('/api/webhook', express.raw({type: 'application/json'}), async (req, re
 app.use(express.json());
 
 // Sichere Download-Route - KORRIGIERT für success.html
-app.get('/api/download/mixing-eq-guide', async (req, res) => {
+app.get('/api/download/mixing-eq-guide', limiter, async (req, res) => {
   const sessionId = req.query.session_id;
   
   if (!sessionId) {
@@ -109,7 +123,7 @@ app.get('/api/products', (req, res) => {
 });
 
 // API: Stripe Checkout Session erstellen
-app.post('/api/create-checkout-session', async (req, res) => {
+app.post('/api/create-checkout-session', limiter, async (req, res) => {
   try {
     const { items, customerEmail } = req.body;
     
