@@ -23,8 +23,6 @@ const products = [
   }
 ];
 
-console.log("🔥 WEBHOOK RECEIVED:", event.type);
-
 // WEBHOOK zuerst (roher Body, kein express.json() davor!)
 app.post('/api/webhook', express.raw({type: 'application/json'}), async (req, res) => {
   const sig = req.headers['stripe-signature'];
@@ -35,50 +33,28 @@ app.post('/api/webhook', express.raw({type: 'application/json'}), async (req, re
     event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
   } catch (err) {
     console.error('Webhook Error:', err.message);
+    // HIER WAR DER FEHLER - korrigiert:
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
   if (event.type === 'checkout.session.completed') {
-  const session = event.data.object;
-
-  const email =
-    session.customer_details?.email ||
-    session.customer_email;
-
-  console.log("✅ Zahlung erfolgreich");
-  console.log("📨 Email:", email);
-
-  if (!email) {
-    console.log("❌ Keine Email vorhanden");
-    return res.json({ received: true });
-  }
-
-  try {
-    await resend.emails.send({
-      from: process.env.FROM_EMAIL,
-      to: email,
-      subject: 'Dein taghiwaves Download ist bereit!',
-      html: `<h1>Download bereit</h1>`
-    });
-
-    console.log("📧 Email gesendet!");
-  } catch (err) {
-    console.error("❌ Email Fehler:", err);
-  }
-}
-
-console.log("📨 Käufer Email:", email);
-
-if (!email) {
-  console.log("❌ Keine Email gefunden!");
-  return res.json({ received: true });
-}
+    const session = event.data.object;
     
+    // Email aus verschiedenen möglichen Quellen extrahieren
+    const email = session.customer_details?.email || session.customer_email;
+    
+    console.log('✅ Zahlung erfolgreich:', email);
+    
+    if (!email) {
+      console.error('❌ Keine E-Mail im Session Object gefunden');
+      return res.json({received: true});
+    }
+
     // E-Mail senden
     try {
       await resend.emails.send({
         from: process.env.FROM_EMAIL,
-        to: session.customer_email,
+        to: email,
         subject: 'Dein taghiwaves Download ist bereit!',
         html: `
           <h1>Vielen Dank für deinen Kauf!</h1>
@@ -92,7 +68,7 @@ if (!email) {
           <p>taghiwaves Team</p>
         `
       });
-      console.log('📧 E-Mail gesendet an:', session.customer_email);
+      console.log('📧 E-Mail gesendet an:', email);
     } catch (error) {
       console.error('❌ E-Mail Fehler:', error);
     }
