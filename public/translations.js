@@ -1,5 +1,26 @@
 const translations = {
   de: {
+
+    // Kategorien (müssen zu den Rückgabewerten von getCategory passen)
+    mixing: 'Mixing',
+    mastering: 'Mastering', 
+    production: 'Produktion',
+    templates: 'Templates',
+  
+    // Formate
+    formatPDFPresets: 'PDF + Presets',
+    formatALSPDF: 'ALS + PDF',
+    formatPDFMIDI: 'PDF + MIDI',
+    formatPDFVideo: 'PDF + Video',
+  
+    // Einheiten
+    pagesSuffix: 'Seiten',
+    templatesSuffix: 'Templates',
+  
+    // Spezifisch für dein Produkt (optional, falls Titel/Desc auch übersetzt werden sollen)
+    prodCheatTitle: 'Mixing EQ Cheat Sheet',
+    prodCheatDesc: 'Schnellreferenz für EQ-Einstellungen aller Instrumente. PDF-Download.'
+
     // Meta
     pageTitle: 'taghiwaves - Premium Musikproduktion Guides | Mixing & Mastering Cheat Sheets',
     metaDescription: 'Professionelle Musikproduktion Guides, Mixing & Mastering Cheat Sheets, Templates und Workflows. Sofortiger Download nach dem Kauf. Für Produzenten jeden Levels.',
@@ -98,6 +119,19 @@ const translations = {
     mobileMenuAriaLabel: 'Open menu',
     logoAriaLabel: 'taghiwaves Home',
     cartAriaLabel: 'Open cart',
+    // ... bestehende Keys ...
+    mixing: 'Mixing',
+    mastering: 'Mastering',
+    production: 'Production',
+    templates: 'Templates',
+    formatPDFPresets: 'PDF + Presets',
+    formatALSPDF: 'ALS + PDF',
+    formatPDFMIDI: 'PDF + MIDI',
+    formatPDFVideo: 'PDF + Video',
+    pagesSuffix: 'pages',
+    templatesSuffix: 'templates',
+    prodCheatTitle: 'Mixing EQ Cheat Sheet',
+    prodCheatDesc: 'Quick reference for EQ settings of all instruments. PDF download.'
 
     // Hero
     heroBadge: 'Premium Music Production Guides',
@@ -183,6 +217,20 @@ const translations = {
     mobileMenuAriaLabel: 'Menyunu aç',
     logoAriaLabel: 'taghiwaves Ana Səhifə',
     cartAriaLabel: 'Səbəti aç',
+
+    // ... bestehende Keys ...
+    mixing: 'Mixing',
+    mastering: 'Mastering',
+    production: 'İstehsal',
+    templates: 'Şablonlar',
+    formatPDFPresets: 'PDF + Presetlər',
+    formatALSPDF: 'ALS + PDF',
+    formatPDFMIDI: 'PDF + MIDI',
+    formatPDFVideo: 'PDF + Video',
+    pagesSuffix: 'səhifə',
+    templatesSuffix: 'şablon',
+    prodCheatTitle: 'Mixing EQ Cheat Sheet',
+    prodCheatDesc: 'Bütün alətlər üçün EQ parametrləri üçün tez istinad. PDF yükləmə.'
 
     // Hero
     heroBadge: 'Premium Musiqi İstehsalı Bələdçiləri',

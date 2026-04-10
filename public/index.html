@@ -975,28 +975,33 @@
         }
     }
 
-    function getCategory(name) {
-        if (name.includes('Mixing')) return 'mixing';
-        if (name.includes('Mastering')) return 'mastering';
-        if (name.includes('Template')) return 'templates';
-        return 'production';
-    }
+    // Umbenennen: getCategory gibt jetzt Keys zurück, die übersetzt werden
+function getCategory(name) {
+    if (name.includes('Mixing')) return 'mixing';
+    if (name.includes('Mastering')) return 'mastering';
+    if (name.includes('Template')) return 'templates';
+    return 'production';
+}
 
-    function getPages(name) {
-        if (name.includes('Handbook')) return '150 Seiten';
-        if (name.includes('Workflow')) return '80 Seiten';
-        if (name.includes('Masterclass')) return '100 Seiten';
-        if (name.includes('Templates')) return '5 Templates';
-        if (name.includes('Bible')) return '90 Seiten';
-        return '120 Seiten';
+function getPages(name) {
+    let count = '120';
+    if (name.includes('Handbook')) count = '150';
+    else if (name.includes('Workflow')) count = '80';
+    else if (name.includes('Masterclass')) count = '100';
+    else if (name.includes('Bible')) count = '90';
+    
+    if (name.includes('Templates')) {
+        return `5 ${t('templatesSuffix')}`;
     }
+    return `${count} ${t('pagesSuffix')}`;
+}
 
-    function getFormat(name) {
-        if (name.includes('Template')) return 'ALS + PDF';
-        if (name.includes('Drum')) return 'PDF + MIDI';
-        if (name.includes('Vocal')) return 'PDF + Video';
-        return 'PDF + Presets';
-    }
+function getFormat(name) {
+    if (name.includes('Template')) return t('formatALSPDF');
+    if (name.includes('Drum')) return t('formatPDFMIDI');
+    if (name.includes('Vocal')) return t('formatPDFVideo');
+    return t('formatPDFPresets');
+}
 
     function getBadge(name) {
         if (name.includes('Handbook')) return 'Bestseller';
@@ -1031,7 +1036,7 @@
                     ${product.badge ? `<span class="product-badge">${escapeHtml(product.badge)}</span>` : ''}
                 </div>
                 <div class="product-content">
-                    <div class="product-category">${escapeHtml(product.category)}</div>
+                    <div class="product-category">${t(product.category).toUpperCase()}</div>
                     <h3 class="product-title">${escapeHtml(product.title)}</h3>
                     <p class="product-description">${escapeHtml(product.description)}</p>
                     <div class="product-meta">
