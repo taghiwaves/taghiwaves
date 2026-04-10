@@ -1,7 +1,7 @@
 require('dotenv').config();
 
 // Pflicht-Umgebungsvariablen prüfen
-const required = ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET', 'RESEND_API_KEY', 'FROM_EMAIL'];
+const required = ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET', 'GMAIL_USER', 'GMAIL_APP_PASSWORD'];
 required.forEach(key => {
   if (!process.env[key]) throw new Error(`Fehlende Umgebungsvariable: ${key}`);
 });
@@ -10,12 +10,29 @@ const express = require('express');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const cors = require('cors');
 const path = require('path');
-const { Resend } = require('resend');
-const resend = new Resend(process.env.RESEND_API_KEY);
+const nodemailer = require('nodemailer');
 const rateLimit = require('express-rate-limit');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Nodemailer Transporter mit Gmail
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_APP_PASSWORD
+  }
+});
+
+// Verbindung testen
+transporter.verify((error, success) => {
+  if (error) {
+    console.error('❌ Gmail Verbindungsfehler:', error);
+  } else {
+    console.log('✅ Gmail Server bereit');
+  }
+});
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 Minuten
@@ -63,10 +80,10 @@ app.post('/api/webhook', express.raw({type: 'application/json'}), async (req, re
       return res.json({received: true});
     }
 
-    // E-Mail senden
+    // E-Mail senden via Nodemailer
     try {
-      await resend.emails.send({
-        from: process.env.FROM_EMAIL,
+      await transporter.sendMail({
+        from: `"taghiwaves" <${process.env.GMAIL_USER}>`,
         to: email,
         subject: 'Dein taghiwaves Download ist bereit!',
         html: `
