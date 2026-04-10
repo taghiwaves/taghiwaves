@@ -1,3 +1,66 @@
+// Am Anfang von server.js hinzufügen
+const downloadTracker = new Map(); // Speichert: sessionId -> { downloaded: boolean, timestamp: Date }
+
+// Download-Route anpassen
+app.get('/api/download/mixing-eq-guide', limiter, async (req, res) => {
+  const sessionId = req.query.session_id;
+  
+  if (!sessionId) {
+    return res.status(403).send('Zugriff verweigert. Bitte erst kaufen.');
+  }
+  
+  // Prüfen ob bereits heruntergeladen
+  const tracker = downloadTracker.get(sessionId);
+  if (tracker?.downloaded) {
+    return res.status(403).send(`
+      <html>
+        <head><title>Download bereits genutzt</title></head>
+        <body style="font-family: Arial; text-align: center; padding: 50px;">
+          <h1>⚠️ Download bereits verwendet</h1>
+          <p>Dieser Link wurde bereits einmal genutzt.</p>
+          <p>Bei Problemen kontaktiere uns: hello@taghiwaves.com</p>
+        </body>
+      </html>
+    `);
+  }
+  
+  try {
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    
+    if (session.payment_status !== 'paid') {
+      return res.status(403).send('Zahlung nicht bestätigt.');
+    }
+    
+    const filePath = path.join(__dirname, 'public', 'downloads', 'mixing-eq-guide.pdf');
+    
+    // Als heruntergeladen markieren (BEVOR der Download startet)
+    downloadTracker.set(sessionId, { 
+      downloaded: true, 
+      timestamp: new Date(),
+      email: session.customer_details?.email || session.customer_email 
+    });
+    
+    // Optional: Alte Einträge nach 30 Tagen löschen
+    cleanupOldDownloads();
+    
+    res.download(filePath, 'Mixing-EQ-Cheat-Sheet.pdf');
+    
+  } catch (error) {
+    console.error('Download-Fehler:', error);
+    res.status(500).send('Download-Fehler: ' + error.message);
+  }
+});
+
+// Hilfsfunktion: Alte Downloads aufräumen (älter als 30 Tage)
+function cleanupOldDownloads() {
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  for (const [sessionId, data] of downloadTracker.entries()) {
+    if (data.timestamp < thirtyDaysAgo) {
+      downloadTracker.delete(sessionId);
+    }
+  }
+}
+
 require('dotenv').config();
 
 // Pflicht-Umgebungsvariablen prüfen
