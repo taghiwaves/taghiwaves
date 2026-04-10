@@ -14,26 +14,21 @@ const fs = require('fs');
 const nodemailer = require('nodemailer');
 const rateLimit = require('express-rate-limit');
 
-// ✅ DATABASE IMPORT
-const { 
-  initializeTables, 
-  createOrder, 
-  updateOrderPaymentStatus,
-  getOrder,
-  createDownloadRecord,
-  getDownloadRecord,
-  markAsDownloaded,
-  logAuditEvent,
-  getStats,
-  getAllOrders,
-  getAuditLogs
-} = require('./db');
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Datenbank initialisieren
-initializeTables();
+// ✅ HIER: Download-Tracker (nach const app = express())
+const downloadTracker = new Map();
+
+// Hilfsfunktion: Alte Downloads aufräumen
+function cleanupOldDownloads() {
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  for (const [sessionId, data] of downloadTracker.entries()) {
+    if (data.timestamp < thirtyDaysAgo) {
+      downloadTracker.delete(sessionId);
+    }
+  }
+}
 
 // Nodemailer Transporter mit Gmail
 const transporter = nodemailer.createTransport({
@@ -173,7 +168,6 @@ app.post('/api/webhook', express.raw({type: 'application/json'}), async (req, re
     event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
   } catch (err) {
     console.error('Webhook Error:', err.message);
-    await logAuditEvent('webhook_error', 'Stripe Webhook Signature Fehler', { error: err.message });
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
@@ -185,20 +179,10 @@ app.post('/api/webhook', express.raw({type: 'application/json'}), async (req, re
     
     if (!email) {
       console.error('❌ Keine E-Mail im Session Object gefunden');
-      await logAuditEvent('payment_error', 'Keine E-Mail in Webhook', { sessionId: session.id });
       return res.json({received: true});
     }
 
     try {
-      // ✅ Update Order Status in Datenbank
-      await updateOrderPaymentStatus(session.id, 'paid');
-      console.log('📝 Order Status aktualisiert in DB:', session.id);
-
-      // ✅ Erstelle Download-Record
-      await createDownloadRecord(session.id, email);
-      console.log('📥 Download-Record erstellt');
-
-      // Sende E-Mail
       await transporter.sendMail({
         from: `"taghiwaves" <${process.env.GMAIL_USER}>`,
         to: email,
@@ -216,11 +200,8 @@ app.post('/api/webhook', express.raw({type: 'application/json'}), async (req, re
         `
       });
       console.log('📧 E-Mail gesendet an:', email);
-      await logAuditEvent('email_sent', 'Download-Link E-Mail versendet', { email, sessionId: session.id });
-
     } catch (error) {
-      console.error('❌ Fehler in Webhook:', error);
-      await logAuditEvent('webhook_error', 'Fehler beim Verarbeiten von Webhook', { error: error.message, sessionId: session.id });
+      console.error('❌ E-Mail Fehler:', error);
     }
   }
 
@@ -231,55 +212,43 @@ app.post('/api/webhook', express.raw({type: 'application/json'}), async (req, re
 app.use(express.json());
 
 // ============================================
-// 🛡️ DOWNLOAD-ROUTE MIT DATENBANKPRÜFUNG
+// 🛡️ DOWNLOAD-ROUTE MIT DATEI-PRÜFUNG
 // ============================================
 
 app.get('/api/download/mixing-eq-guide', limiter, async (req, res) => {
   const sessionId = req.query.session_id;
   
   if (!sessionId) {
-    await logAuditEvent('download_denied', 'Kein Session ID vorhanden');
     return res.status(403).send('Zugriff verweigert. Bitte erst kaufen.');
   }
   
+  // Prüfen ob bereits heruntergeladen
+  const tracker = downloadTracker.get(sessionId);
+  if (tracker?.downloaded) {
+    return res.status(403).send(`
+      <html>
+        <head><title>Download bereits genutzt</title></head>
+        <body style="font-family: Arial; text-align: center; padding: 50px; background: #0a0a0f; color: #fff;">
+          <h1>⚠️ Download bereits verwendet</h1>
+          <p>Dieser Link wurde bereits einmal genutzt.</p>
+          <p style="color: #00f0ff;">Bei Problemen kontaktiere uns: hello@taghiwaves.com</p>
+        </body>
+      </html>
+    `);
+  }
+  
   try {
-    // ✅ Prüfe Download-Record in Datenbank
-    const downloadRecord = await getDownloadRecord(sessionId);
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
     
-    if (!downloadRecord) {
-      await logAuditEvent('download_denied', 'Download-Record nicht gefunden', { sessionId });
-      return res.status(403).send('Download nicht gefunden.');
-    }
-
-    // Prüfe ob bereits heruntergeladen
-    if (downloadRecord.downloaded) {
-      await logAuditEvent('download_denied', 'Download bereits verwendet', { sessionId, email: downloadRecord.email });
-      return res.status(403).send(`
-        <html>
-          <head><title>Download bereits genutzt</title></head>
-          <body style="font-family: Arial; text-align: center; padding: 50px; background: #0a0a0f; color: #fff;">
-            <h1>⚠️ Download bereits verwendet</h1>
-            <p>Dieser Link wurde bereits einmal genutzt.</p>
-            <p style="color: #00f0ff;">Bei Problemen kontaktiere uns: hello@taghiwaves.com</p>
-          </body>
-        </html>
-      `);
-    }
-
-    // ✅ Prüfe Order Status
-    const order = await getOrder(sessionId);
-    
-    if (!order || order.payment_status !== 'paid') {
-      await logAuditEvent('download_denied', 'Zahlung nicht bestätigt', { sessionId });
+    if (session.payment_status !== 'paid') {
       return res.status(403).send('Zahlung nicht bestätigt.');
     }
     
     const filePath = path.join(__dirname, 'public', 'downloads', 'mixing-eq-guide.pdf');
     
-    // ✅ Prüfe ob Datei existiert
+    // ✅ NEU: Prüfe ob Datei existiert BEVOR Download
     if (!fs.existsSync(filePath)) {
       console.error('❌ Datei nicht gefunden:', filePath);
-      await logAuditEvent('download_error', 'Datei nicht gefunden', { filePath });
       return res.status(404).send(`
         <html>
           <head><title>Datei nicht verfügbar</title></head>
@@ -292,19 +261,20 @@ app.get('/api/download/mixing-eq-guide', limiter, async (req, res) => {
       `);
     }
     
-    // ✅ Markiere als heruntergeladen BEVOR Download startet
-    await markAsDownloaded(sessionId);
-    console.log('✅ Download gestartet:', sessionId);
-    await logAuditEvent('download_success', 'PDF erfolgreich heruntergeladen', { 
-      sessionId, 
-      email: order.customer_email 
+    // Als heruntergeladen markieren (BEVOR der Download startet)
+    downloadTracker.set(sessionId, { 
+      downloaded: true, 
+      timestamp: new Date(),
+      email: session.customer_details?.email || session.customer_email 
     });
+    
+    // Alte Einträge aufräumen
+    cleanupOldDownloads();
     
     res.download(filePath, 'Mixing-EQ-Cheat-Sheet.pdf');
     
   } catch (error) {
-    console.error('❌ Download-Fehler:', error);
-    await logAuditEvent('download_error', 'Fehler beim Download', { error: error.message, sessionId });
+    console.error('Download-Fehler:', error);
     res.status(500).send('Download-Fehler: ' + error.message);
   }
 });
@@ -318,7 +288,7 @@ app.get('/api/products', (req, res) => {
 });
 
 // ============================================
-// 🛡️ API: Checkout Session (MIT VALIDIERUNG + DB)
+// 🛡️ API: Checkout Session (MIT VALIDIERUNG!)
 // ============================================
 
 app.post('/api/create-checkout-session', limiter, async (req, res) => {
@@ -329,8 +299,9 @@ app.post('/api/create-checkout-session', limiter, async (req, res) => {
     const validation = validateCheckoutInput(items, customerEmail);
     if (!validation.valid) {
       console.warn('❌ Validierungsfehler:', validation.error);
-      await logAuditEvent('validation_error', validation.error, { items, customerEmail });
-      return res.status(400).json({ error: validation.error });
+      return res.status(400).json({ 
+        error: validation.error 
+      });
     }
     
     const lineItems = items.map(item => ({
@@ -361,62 +332,11 @@ app.post('/api/create-checkout-session', limiter, async (req, res) => {
     }
 
     const session = await stripe.checkout.sessions.create(sessionConfig);
-    
-    // ✅ Speichere Order in Datenbank
-    try {
-      await createOrder(
-        session.id,
-        customerEmail || session.customer_email || 'unknown@email.com',
-        items[0].name,
-        items[0].price
-      );
-      console.log('📝 Order in DB erstellt:', session.id);
-    } catch (dbError) {
-      console.error('❌ Fehler beim Speichern in DB:', dbError);
-      await logAuditEvent('database_error', 'Fehler beim Erstellen von Order', { error: dbError.message });
-      // Gebe dennoch die Session zurück (Order wird beim Webhook erstellt)
-    }
-
     res.json({ id: session.id });
     
   } catch (error) {
     console.error('Checkout Fehler:', error);
-    await logAuditEvent('checkout_error', 'Fehler beim Checkout', { error: error.message });
     res.status(500).json({ error: 'Fehler beim Erstellen der Checkout-Session' });
-  }
-});
-
-// ============================================
-// 📊 ADMIN ROUTES (Optional, für später)
-// ============================================
-
-// Statistiken abrufen (vereinfacht, später mit Auth!)
-app.get('/api/admin/stats', async (req, res) => {
-  try {
-    const stats = await getStats();
-    res.json(stats);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Alle Orders anschauen (vereinfacht, später mit Auth!)
-app.get('/api/admin/orders', async (req, res) => {
-  try {
-    const orders = await getAllOrders();
-    res.json(orders);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Audit-Logs anschauen (vereinfacht, später mit Auth!)
-app.get('/api/admin/logs', async (req, res) => {
-  try {
-    const logs = await getAuditLogs(100);
-    res.json(logs);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
   }
 });
 
