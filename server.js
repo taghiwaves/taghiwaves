@@ -1,66 +1,3 @@
-// Am Anfang von server.js hinzufügen
-const downloadTracker = new Map(); // Speichert: sessionId -> { downloaded: boolean, timestamp: Date }
-
-// Download-Route anpassen
-app.get('/api/download/mixing-eq-guide', limiter, async (req, res) => {
-  const sessionId = req.query.session_id;
-  
-  if (!sessionId) {
-    return res.status(403).send('Zugriff verweigert. Bitte erst kaufen.');
-  }
-  
-  // Prüfen ob bereits heruntergeladen
-  const tracker = downloadTracker.get(sessionId);
-  if (tracker?.downloaded) {
-    return res.status(403).send(`
-      <html>
-        <head><title>Download bereits genutzt</title></head>
-        <body style="font-family: Arial; text-align: center; padding: 50px;">
-          <h1>⚠️ Download bereits verwendet</h1>
-          <p>Dieser Link wurde bereits einmal genutzt.</p>
-          <p>Bei Problemen kontaktiere uns: hello@taghiwaves.com</p>
-        </body>
-      </html>
-    `);
-  }
-  
-  try {
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
-    
-    if (session.payment_status !== 'paid') {
-      return res.status(403).send('Zahlung nicht bestätigt.');
-    }
-    
-    const filePath = path.join(__dirname, 'public', 'downloads', 'mixing-eq-guide.pdf');
-    
-    // Als heruntergeladen markieren (BEVOR der Download startet)
-    downloadTracker.set(sessionId, { 
-      downloaded: true, 
-      timestamp: new Date(),
-      email: session.customer_details?.email || session.customer_email 
-    });
-    
-    // Optional: Alte Einträge nach 30 Tagen löschen
-    cleanupOldDownloads();
-    
-    res.download(filePath, 'Mixing-EQ-Cheat-Sheet.pdf');
-    
-  } catch (error) {
-    console.error('Download-Fehler:', error);
-    res.status(500).send('Download-Fehler: ' + error.message);
-  }
-});
-
-// Hilfsfunktion: Alte Downloads aufräumen (älter als 30 Tage)
-function cleanupOldDownloads() {
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-  for (const [sessionId, data] of downloadTracker.entries()) {
-    if (data.timestamp < thirtyDaysAgo) {
-      downloadTracker.delete(sessionId);
-    }
-  }
-}
-
 require('dotenv').config();
 
 // Pflicht-Umgebungsvariablen prüfen
@@ -78,6 +15,19 @@ const rateLimit = require('express-rate-limit');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// ✅ HIER: Download-Tracker (nach const app = express())
+const downloadTracker = new Map();
+
+// Hilfsfunktion: Alte Downloads aufräumen
+function cleanupOldDownloads() {
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  for (const [sessionId, data] of downloadTracker.entries()) {
+    if (data.timestamp < thirtyDaysAgo) {
+      downloadTracker.delete(sessionId);
+    }
+  }
+}
 
 // Nodemailer Transporter mit Gmail
 const transporter = nodemailer.createTransport({
@@ -98,7 +48,7 @@ transporter.verify((error, success) => {
 });
 
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 Minuten
+  windowMs: 15 * 60 * 1000,
   max: 20,
   message: { error: 'Zu viele Anfragen. Bitte versuche es später erneut.' }
 });
@@ -107,17 +57,17 @@ const limiter = rateLimit({
 app.use(cors({ origin: 'https://taghiwaves.onrender.com' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Produkte (in Produktion: Datenbank)
+// Produkte
 const products = [
   {
     id: "prod_cheat",
     name: "Mixing EQ Cheat Sheet",
-    price: 50, // 0,50€ in cents
+    price: 50,
     description: "Schnellreferenz für EQ-Einstellungen aller Instrumente. PDF-Download."
   }
 ];
 
-// WEBHOOK zuerst (roher Body, kein express.json() davor!)
+// WEBHOOK zuerst
 app.post('/api/webhook', express.raw({type: 'application/json'}), async (req, res) => {
   const sig = req.headers['stripe-signature'];
   const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -132,8 +82,6 @@ app.post('/api/webhook', express.raw({type: 'application/json'}), async (req, re
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
-    
-    // Email aus verschiedenen möglichen Quellen extrahieren
     const email = session.customer_details?.email || session.customer_email;
     
     console.log('✅ Zahlung erfolgreich:', email);
@@ -143,7 +91,6 @@ app.post('/api/webhook', express.raw({type: 'application/json'}), async (req, re
       return res.json({received: true});
     }
 
-    // E-Mail senden via Nodemailer
     try {
       await transporter.sendMail({
         from: `"taghiwaves" <${process.env.GMAIL_USER}>`,
@@ -170,15 +117,30 @@ app.post('/api/webhook', express.raw({type: 'application/json'}), async (req, re
   res.json({received: true});
 });
 
-// ERST DANACH json parser für API Routes
+// ERST DANACH json parser
 app.use(express.json());
 
-// Sichere Download-Route - KORRIGIERT für success.html
+// ✅ KORRIGIERTE Download-Route (nur EINMAL, mit Tracking)
 app.get('/api/download/mixing-eq-guide', limiter, async (req, res) => {
   const sessionId = req.query.session_id;
   
   if (!sessionId) {
     return res.status(403).send('Zugriff verweigert. Bitte erst kaufen.');
+  }
+  
+  // Prüfen ob bereits heruntergeladen
+  const tracker = downloadTracker.get(sessionId);
+  if (tracker?.downloaded) {
+    return res.status(403).send(`
+      <html>
+        <head><title>Download bereits genutzt</title></head>
+        <body style="font-family: Arial; text-align: center; padding: 50px; background: #0a0a0f; color: #fff;">
+          <h1>⚠️ Download bereits verwendet</h1>
+          <p>Dieser Link wurde bereits einmal genutzt.</p>
+          <p style="color: #00f0ff;">Bei Problemen kontaktiere uns: hello@taghiwaves.com</p>
+        </body>
+      </html>
+    `);
   }
   
   try {
@@ -189,6 +151,17 @@ app.get('/api/download/mixing-eq-guide', limiter, async (req, res) => {
     }
     
     const filePath = path.join(__dirname, 'public', 'downloads', 'mixing-eq-guide.pdf');
+    
+    // Als heruntergeladen markieren (BEVOR der Download startet)
+    downloadTracker.set(sessionId, { 
+      downloaded: true, 
+      timestamp: new Date(),
+      email: session.customer_details?.email || session.customer_email 
+    });
+    
+    // Alte Einträge aufräumen
+    cleanupOldDownloads();
+    
     res.download(filePath, 'Mixing-EQ-Cheat-Sheet.pdf');
     
   } catch (error) {
@@ -228,23 +201,21 @@ app.post('/api/create-checkout-session', limiter, async (req, res) => {
       automatic_tax: { enabled: true },
     };
 
-    // Wenn E-Mail vom Frontend kommt, nutze sie
     if (customerEmail) {
       sessionConfig.customer_email = customerEmail;
     } else {
-      // Sonst lässt Stripe den Kunden nach E-Mail fragen
       sessionConfig.customer_creation = 'always';
     }
 
     const session = await stripe.checkout.sessions.create(sessionConfig);
-
     res.json({ id: session.id });
+    
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// Health Check für Render
+// Health Check
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
