@@ -10,6 +10,7 @@ const express = require('express');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 const nodemailer = require('nodemailer');
 const rateLimit = require('express-rate-limit');
 
@@ -67,7 +68,128 @@ const products = [
   }
 ];
 
-// WEBHOOK zuerst
+// ============================================
+// 🛡️ VALIDIERUNGSFUNKTIONEN (NEU!)
+// ============================================
+
+/**
+ * Validiert E-Mail Adressen
+ * @param {string} email - E-Mail zum Prüfen
+ * @returns {boolean}
+ */
+function isValidEmail(email) {
+  if (typeof email !== 'string') return false;
+  if (email.length > 254) return false;
+  
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+/**
+ * Sanitizes und validiert einen String
+ * @param {string} str - String zum validieren
+ * @param {number} minLen - Minimum Länge
+ * @param {number} maxLen - Maximum Länge
+ * @returns {boolean}
+ */
+function isValidString(str, minLen = 1, maxLen = 500) {
+  if (typeof str !== 'string') return false;
+  if (str.trim().length < minLen) return false;
+  if (str.length > maxLen) return false;
+  return true;
+}
+
+/**
+ * Validiert einen Checkout-Artikel
+ * @param {object} item - Artikel zum validieren
+ * @returns {{valid: boolean, error?: string}}
+ */
+function validateItem(item) {
+  // Muss ein Objekt sein
+  if (!item || typeof item !== 'object' || Array.isArray(item)) {
+    return { valid: false, error: 'Artikel muss ein Objekt sein' };
+  }
+
+  // Nur erlaubte Felder
+  const allowedFields = ['name', 'price', 'description'];
+  const itemKeys = Object.keys(item);
+  const unknownFields = itemKeys.filter(key => !allowedFields.includes(key));
+  if (unknownFields.length > 0) {
+    return { valid: false, error: `Unbekannte Felder: ${unknownFields.join(', ')}` };
+  }
+
+  // Name validieren
+  if (!isValidString(item.name, 1, 100)) {
+    return { valid: false, error: 'Name muss 1-100 Zeichen lang sein' };
+  }
+
+  // Description validieren
+  if (!isValidString(item.description, 1, 500)) {
+    return { valid: false, error: 'Beschreibung muss 1-500 Zeichen lang sein' };
+  }
+
+  // Price validieren
+  if (typeof item.price !== 'number') {
+    return { valid: false, error: 'Preis muss eine Zahl sein' };
+  }
+
+  if (!Number.isInteger(item.price)) {
+    return { valid: false, error: 'Preis muss ein ganzer Betrag in Cent sein (z.B. 5000 für 50€)' };
+  }
+
+  if (item.price < 50) {
+    return { valid: false, error: 'Minimum Preis: 0,50€ (50 Cent)' };
+  }
+
+  if (item.price > 9999900) {
+    return { valid: false, error: 'Maximum Preis: 99.999,00€' };
+  }
+
+  return { valid: true };
+}
+
+/**
+ * Hauptvalidierungsfunktion für Checkout
+ * @param {array} items - Array von Artikeln
+ * @param {string} customerEmail - Kunden E-Mail
+ * @returns {{valid: boolean, error?: string}}
+ */
+function validateCheckoutInput(items, customerEmail) {
+  // Items prüfen
+  if (!Array.isArray(items)) {
+    return { valid: false, error: 'items muss ein Array sein' };
+  }
+
+  if (items.length === 0) {
+    return { valid: false, error: 'Mindestens ein Artikel erforderlich' };
+  }
+
+  if (items.length > 10) {
+    return { valid: false, error: 'Maximum 10 Artikel pro Bestellung' };
+  }
+
+  // Jeden Artikel validieren
+  for (let i = 0; i < items.length; i++) {
+    const itemValidation = validateItem(items[i]);
+    if (!itemValidation.valid) {
+      return { valid: false, error: `Artikel ${i + 1}: ${itemValidation.error}` };
+    }
+  }
+
+  // customerEmail validieren wenn vorhanden
+  if (customerEmail) {
+    if (!isValidEmail(customerEmail)) {
+      return { valid: false, error: 'Ungültige E-Mail Adresse' };
+    }
+  }
+
+  return { valid: true };
+}
+
+// ============================================
+// WEBHOOK
+// ============================================
+
 app.post('/api/webhook', express.raw({type: 'application/json'}), async (req, res) => {
   const sig = req.headers['stripe-signature'];
   const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -120,7 +242,10 @@ app.post('/api/webhook', express.raw({type: 'application/json'}), async (req, re
 // ERST DANACH json parser
 app.use(express.json());
 
-// ✅ KORRIGIERTE Download-Route (nur EINMAL, mit Tracking)
+// ============================================
+// 🛡️ DOWNLOAD-ROUTE MIT DATEI-PRÜFUNG (VERBESSERT)
+// ============================================
+
 app.get('/api/download/mixing-eq-guide', limiter, async (req, res) => {
   const sessionId = req.query.session_id;
   
@@ -152,6 +277,21 @@ app.get('/api/download/mixing-eq-guide', limiter, async (req, res) => {
     
     const filePath = path.join(__dirname, 'public', 'downloads', 'mixing-eq-guide.pdf');
     
+    // ✅ NEU: Prüfe ob Datei existiert BEVOR Download
+    if (!fs.existsSync(filePath)) {
+      console.error('❌ Datei nicht gefunden:', filePath);
+      return res.status(404).send(`
+        <html>
+          <head><title>Datei nicht verfügbar</title></head>
+          <body style="font-family: Arial; text-align: center; padding: 50px; background: #0a0a0f; color: #fff;">
+            <h1>❌ Datei nicht verfügbar</h1>
+            <p>Die Datei konnte nicht gefunden werden. Bitte kontaktiere den Support.</p>
+            <p style="color: #00f0ff;">E-Mail: hello@taghiwaves.com</p>
+          </body>
+        </html>
+      `);
+    }
+    
     // Als heruntergeladen markieren (BEVOR der Download startet)
     downloadTracker.set(sessionId, { 
       downloaded: true, 
@@ -170,15 +310,31 @@ app.get('/api/download/mixing-eq-guide', limiter, async (req, res) => {
   }
 });
 
+// ============================================
+// API ROUTES
+// ============================================
+
 // API: Produkte abrufen
 app.get('/api/products', (req, res) => {
   res.json(products);
 });
 
-// API: Stripe Checkout Session erstellen
+// ============================================
+// 🛡️ API: Checkout Session (MIT VALIDIERUNG!)
+// ============================================
+
 app.post('/api/create-checkout-session', limiter, async (req, res) => {
   try {
     const { items, customerEmail } = req.body;
+    
+    // ✅ VALIDIERUNG HINZUGEFÜGT
+    const validation = validateCheckoutInput(items, customerEmail);
+    if (!validation.valid) {
+      console.warn('❌ Validierungsfehler:', validation.error);
+      return res.status(400).json({ 
+        error: validation.error 
+      });
+    }
     
     const lineItems = items.map(item => ({
       price_data: {
@@ -211,16 +367,23 @@ app.post('/api/create-checkout-session', limiter, async (req, res) => {
     res.json({ id: session.id });
     
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Checkout Fehler:', error);
+    res.status(500).json({ error: 'Fehler beim Erstellen der Checkout-Session' });
   }
 });
 
-// Health Check
+// ============================================
+// HEALTH CHECK
+// ============================================
+
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Start Server
+// ============================================
+// START SERVER
+// ============================================
+
 app.listen(PORT, () => {
   console.log(`🎵 taghiwaves Server läuft auf Port ${PORT}`);
 });
