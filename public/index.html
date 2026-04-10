@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" id="htmlRoot">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -604,41 +604,67 @@
                 transition-duration: 0.01ms !important;
             }
         }
+
+        /* Language Switcher */
+        .lang-switcher {
+            display: flex;
+            gap: 0.4rem;
+            align-items: center;
+        }
+        .lang-btn {
+            background: none;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 6px;
+            padding: 0.3rem 0.5rem;
+            cursor: pointer;
+            font-size: 1.1rem;
+            line-height: 1;
+            transition: all 0.2s;
+            opacity: 0.5;
+        }
+        .lang-btn:hover { opacity: 0.85; border-color: rgba(0,240,255,0.4); }
+        .lang-btn.active { opacity: 1; border-color: var(--neon-cyan); box-shadow: 0 0 8px rgba(0,240,255,0.25); }
     </style>
+    <script src="translations.js"></script>
 </head>
 <body>
     <!-- Skip to content für Accessibility -->
-    <a href="#main-content" class="skip-link">Zum Hauptinhalt springen</a>
+    <a href="#main-content" class="skip-link" data-i18n="skipLink">Zum Hauptinhalt springen</a>
 
     <div class="loader" id="loader" role="status" aria-live="polite">
         <div class="loader-content">
             <div class="loader-spinner"></div>
-            <p>taghiwaves wird geladen...</p>
+            <p data-i18n="loaderText">taghiwaves wird geladen...</p>
         </div>
     </div>
 
     <div class="bg-gradient"></div>
     <div class="grid-overlay"></div>
 
-    <nav role="navigation" aria-label="Hauptnavigation">
-        <a href="/" class="logo" aria-label="taghiwaves Startseite">
+    <nav role="navigation" aria-label="Hauptnavigation" data-i18n-aria-label="navAriaLabel">
+        <a href="/" class="logo" aria-label="taghiwaves Startseite" data-i18n-aria-label="logoAriaLabel">
             <i data-lucide="audio-waveform" aria-hidden="true"></i>
             taghiwaves
         </a>
         
-        <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Menü öffnen" aria-expanded="false" aria-controls="navLinks">
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Menü öffnen" aria-expanded="false" aria-controls="navLinks" data-i18n-aria-label="mobileMenuAriaLabel">
             <i data-lucide="menu" aria-hidden="true"></i>
         </button>
 
         <div class="nav-links" id="navLinks">
-            <a href="#products">Dokumente</a>
-            <a href="#features">Vorteile</a>
-            <a href="#about">Über mich</a>
+            <a href="#products" data-i18n="navDocuments">Dokumente</a>
+            <a href="#features" data-i18n="navFeatures">Vorteile</a>
+            <a href="#about" data-i18n="navAbout">Über mich</a>
         </div>
         
-        <button class="cart-btn" onclick="toggleCart()" aria-label="Warenkorb öffnen" aria-haspopup="dialog" aria-expanded="false" aria-controls="cartSidebar" id="cartToggle">
+        <div class="lang-switcher" aria-label="Sprache wählen">
+            <button class="lang-btn active" onclick="setLanguage('de')" title="Deutsch" data-lang="de">🇩🇪</button>
+            <button class="lang-btn" onclick="setLanguage('en')" title="English" data-lang="en">🇬🇧</button>
+            <button class="lang-btn" onclick="setLanguage('az')" title="Azərbaycan" data-lang="az">🇦🇿</button>
+        </div>
+                <button class="cart-btn" onclick="toggleCart()" aria-label="Warenkorb öffnen" data-i18n-aria-label="cartAriaLabel" aria-haspopup="dialog" aria-expanded="false" aria-controls="cartSidebar" id="cartToggle">
             <i data-lucide="shopping-cart" aria-hidden="true"></i>
-            <span>Warenkorb</span>
+            <span data-i18n="navCart">Warenkorb</span>
             <span class="cart-count" id="cartCount" aria-live="polite" style="display: none;">0</span>
         </button>
     </nav>
@@ -648,18 +674,18 @@
             <div class="hero-content">
                 <div class="hero-badge">
                     <i data-lucide="sparkles" style="width: 16px; height: 16px;" aria-hidden="true"></i>
-                    Premium Musikproduktion Guides
+                    <span data-i18n="heroBadge">Premium Musikproduktion Guides</span>
                 </div>
                 <h1 id="hero-title">Musik Produktion<br>  <span>Mix & Mastering</span></h1>
-                <p>Professionelle Dokumente, Templates und Workflows für Produzenten, die ihren Sound auf das nächste Level bringen wollen.</p>
+                <p data-i18n="heroSubtitle">Professionelle Dokumente, Templates und Workflows für Produzenten, die ihren Sound auf das nächste Level bringen wollen.</p>
                 <div class="hero-cta">
                     <button class="btn-primary" onclick="scrollToProducts()">
-                        Dokumente entdecken
+                        <span data-i18n="heroBtn1">Dokumente entdecken</span>
                         <i data-lucide="arrow-down" style="width: 18px; height: 18px; margin-left: 0.5rem;" aria-hidden="true"></i>
                     </button>
                     <button class="btn-secondary" onclick="showPreview()">
                         <i data-lucide="play-circle" style="width: 18px; height: 18px; margin-right: 0.5rem;" aria-hidden="true"></i>
-                        Vorschau ansehen
+                        <span data-i18n="heroBtn2">Vorschau ansehen</span>
                     </button>
                 </div>
             </div>
@@ -667,22 +693,22 @@
 
         <section class="products" id="products" aria-labelledby="products-title">
             <div class="section-header">
-                <h2 id="products-title">Premium Dokumente</h2>
-                <p>Wähle aus professionellen Guides für jeden Skill-Level</p>
+                <h2 id="products-title" data-i18n="productsTitle">Premium Dokumente</h2>
+                <p data-i18n="productsSubtitle">Wähle aus professionellen Guides für jeden Skill-Level</p>
             </div>
 
             <div class="filters" role="tablist" aria-label="Produktkategorien">
-                <button class="filter-btn active" onclick="filterProducts('all')" role="tab" aria-selected="true" tabindex="0">Alle</button>
-                <button class="filter-btn" onclick="filterProducts('mixing')" role="tab" aria-selected="false" tabindex="-1">Mixing</button>
-                <button class="filter-btn" onclick="filterProducts('mastering')" role="tab" aria-selected="false" tabindex="-1">Mastering</button>
-                <button class="filter-btn" onclick="filterProducts('production')" role="tab" aria-selected="false" tabindex="-1">Produktion</button>
-                <button class="filter-btn" onclick="filterProducts('templates')" role="tab" aria-selected="false" tabindex="-1">Templates</button>
+                <button class="filter-btn active" onclick="filterProducts('all')" role="tab" aria-selected="true" tabindex="0" data-i18n="filterAll">Alle</button>
+                <button class="filter-btn" onclick="filterProducts('mixing')" role="tab" aria-selected="false" tabindex="-1" data-i18n="filterMixing">Mixing</button>
+                <button class="filter-btn" onclick="filterProducts('mastering')" role="tab" aria-selected="false" tabindex="-1" data-i18n="filterMastering">Mastering</button>
+                <button class="filter-btn" onclick="filterProducts('production')" role="tab" aria-selected="false" tabindex="-1" data-i18n="filterProduction">Produktion</button>
+                <button class="filter-btn" onclick="filterProducts('templates')" role="tab" aria-selected="false" tabindex="-1" data-i18n="filterTemplates">Templates</button>
             </div>
 
             <div class="products-grid" id="productsGrid">
                 <div class="error-state" style="grid-column: 1/-1;">
                     <i data-lucide="loader-2" style="width: 48px; height: 48px; opacity: 0.5; animation: spin 1s linear infinite;"></i>
-                    <p>Produkte werden geladen...</p>
+                    <p data-i18n="productsLoading">Produkte werden geladen...</p>
                 </div>
             </div>
         </section>
@@ -691,18 +717,18 @@
             <div class="features-grid">
                 <article class="feature">
                     <div class="feature-icon" aria-hidden="true"><i data-lucide="download"></i></div>
-                    <h3>Sofortiger Download</h3>
-                    <p>Direkter Zugriff auf alle Dokumente nach dem Kauf. Keine Wartezeit, sofort loslegen.</p>
+                    <h3 data-i18n="feature1Title">Sofortiger Download</h3>
+                    <p data-i18n="feature1Text">Direkter Zugriff auf alle Dokumente nach dem Kauf. Keine Wartezeit, sofort loslegen.</p>
                 </article>
                 <article class="feature">
                     <div class="feature-icon" aria-hidden="true"><i data-lucide="refresh-ccw"></i></div>
-                    <h3>Lebenslange Updates</h3>
-                    <p>Alle Dokumente werden regelmäßig aktualisiert. Einmal kaufen, immer aktuell bleiben.</p>
+                    <h3 data-i18n="feature2Title">Lebenslange Updates</h3>
+                    <p data-i18n="feature2Text">Alle Dokumente werden regelmäßig aktualisiert. Einmal kaufen, immer aktuell bleiben.</p>
                 </article>
                 <article class="feature">
                     <div class="feature-icon" aria-hidden="true"><i data-lucide="shield-check"></i></div>
-                    <h3>Sichere Zahlung</h3>
-                    <p>SSL-verschlüsselte Transaktionen über Stripe. 30 Tage Geld-zurück-Garantie.</p>
+                    <h3 data-i18n="feature3Title">Sichere Zahlung</h3>
+                    <p data-i18n="feature3Text">SSL-verschlüsselte Transaktionen über Stripe. 30 Tage Geld-zurück-Garantie.</p>
                 </article>
             </div>
         </section>
@@ -710,33 +736,33 @@
 
     <footer id="about" role="contentinfo">
         <div class="footer-logo">taghiwaves</div>
-        <p>© 2026 taghiwaves. Alle Rechte vorbehalten.</p>
-        <p style="margin-top: 0.5rem; font-size: 0.875rem;">Kontakt: taghiwaves@gmail.com</p>
+        <p data-i18n="footerRights">© 2026 taghiwaves. Alle Rechte vorbehalten.</p>
+        <p style="margin-top: 0.5rem; font-size: 0.875rem;">Kontakt: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="285c494f40415f495e4d5b684f45494144064b4745">[email&#160;protected]</a></p>
     </footer>
 
     <!-- Warenkorb Sidebar -->
     <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()" aria-hidden="true"></div>
     <aside class="cart-sidebar" id="cartSidebar" role="dialog" aria-modal="true" aria-labelledby="cart-heading">
         <div class="cart-header">
-            <h3 id="cart-heading"><i data-lucide="shopping-bag" aria-hidden="true"></i> Dein Warenkorb</h3>
-            <button class="close-cart" onclick="toggleCart()" aria-label="Warenkorb schließen">
+            <h3 id="cart-heading"><i data-lucide="shopping-bag" aria-hidden="true"></i> <span data-i18n="cartTitle">Dein Warenkorb</span></h3>
+            <button class="close-cart" onclick="toggleCart()" aria-label="Warenkorb schließen" data-i18n-aria-label="cartClose">
                 <i data-lucide="x" aria-hidden="true"></i>
             </button>
         </div>
         <div class="cart-items" id="cartItems" role="list" aria-label="Warenkorb Artikel">
             <div class="cart-empty">
                 <i data-lucide="shopping-cart" aria-hidden="true"></i>
-                <p>Dein Warenkorb ist leer</p>
+                <p data-i18n="cartEmpty">Dein Warenkorb ist leer</p>
             </div>
         </div>
         <div class="cart-footer">
             <div class="cart-total">
-                <span>Gesamtsumme</span>
+                <span data-i18n="cartTotal">Gesamtsumme</span>
                 <span id="cartTotal">€0.00</span>
             </div>
             <button class="checkout-btn" id="checkoutBtn" disabled onclick="openEmailModal()">
                 <i data-lucide="credit-card" aria-hidden="true"></i> 
-                <span class="btn-text">Zur Kasse</span>
+                <span class="btn-text" data-i18n="cartCheckout">Zur Kasse</span>
             </button>
         </div>
     </aside>
@@ -744,26 +770,27 @@
     <!-- Email Modal -->
     <div class="modal-overlay" id="emailModal" role="dialog" aria-modal="true" aria-labelledby="email-modal-title">
         <div class="modal-content">
-            <button class="modal-close" onclick="closeEmailModal()" aria-label="Schließen">
+            <button class="modal-close" onclick="closeEmailModal()" aria-label="Schließen" data-i18n-aria-label="modalClose">
                 <i data-lucide="x" aria-hidden="true"></i>
             </button>
-            <h2 class="modal-title" id="email-modal-title">Fast fertig!</h2>
-            <p class="modal-text">Gib deine E-Mail-Adresse ein, um den Download-Link nach dem Kauf zu erhalten.</p>
+            <h2 class="modal-title" id="email-modal-title" data-i18n="modalTitle">Fast fertig!</h2>
+            <p class="modal-text" data-i18n="modalText">Gib deine E-Mail-Adresse ein, um den Download-Link nach dem Kauf zu erhalten.</p>
             
             <form id="emailForm" onsubmit="handleEmailSubmit(event)">
                 <div class="form-group">
-                    <label class="form-label" for="emailInput">E-Mail-Adresse</label>
+                    <label class="form-label" for="emailInput" data-i18n="modalLabel">E-Mail-Adresse</label>
                     <input 
                         type="email" 
                         id="emailInput" 
                         class="form-input" 
-                        placeholder="deine@email.de" 
+                        data-i18n-placeholder="modalPlaceholder"
+                        placeholder="deine@email.de"
                         required
                         autocomplete="email"
                     >
                     <div class="error-message" id="emailError" role="alert"></div>
                 </div>
-                <button type="submit" class="checkout-btn" id="submitEmailBtn">
+                <button type="submit" class="checkout-btn" id="submitEmailBtn" data-i18n="modalSubmit">
                     Weiter zur Zahlung
                 </button>
             </form>
@@ -776,7 +803,68 @@
         <span id="toastMessage">Zum Warenkorb hinzugefügt!</span>
     </div>
 
-    <script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js">
+    // ============================================
+    // 🌍 I18N ENGINE
+    // ============================================
+
+    let currentLang = localStorage.getItem('taghiwaves_lang') || 'de';
+
+    function setLanguage(lang) {
+        if (!translations[lang]) return;
+        currentLang = lang;
+        localStorage.setItem('taghiwaves_lang', lang);
+
+        // HTML lang Attribut
+        document.getElementById('htmlRoot').lang = lang;
+
+        // Alle data-i18n Elemente updaten
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (translations[lang][key] !== undefined) {
+                el.textContent = translations[lang][key];
+            }
+        });
+
+        // aria-label Attribute
+        document.querySelectorAll('[data-i18n-aria-label]').forEach(el => {
+            const key = el.getAttribute('data-i18n-aria-label');
+            if (translations[lang][key] !== undefined) {
+                el.setAttribute('aria-label', translations[lang][key]);
+            }
+        });
+
+        // placeholder Attribute
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+            const key = el.getAttribute('data-i18n-placeholder');
+            if (translations[lang][key] !== undefined) {
+                el.setAttribute('placeholder', translations[lang][key]);
+            }
+        });
+
+        // Page title
+        document.title = translations[lang].pageTitle;
+
+        // Aktiven Flaggen-Button markieren
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+        });
+
+        // Produkte neu rendern (für übersetzte Texte im Grid)
+        if (products.length > 0) renderProducts(currentFilter || 'all');
+    }
+
+    // Beim Start Sprache anwenden
+    document.addEventListener('DOMContentLoaded', () => {
+        setLanguage(currentLang);
+    });
+
+    // Hilfsfunktion: aktuellen Übersetzungstext holen
+    function t(key) {
+        return (translations[currentLang] && translations[currentLang][key]) || translations['de'][key] || key;
+    }
+
+</script><script>
     // Konfiguration
     const CONFIG = {
         STRIPE_PUBLIC_KEY: 'pk_live_51TJzoPCG1b2pY2XXVh9gO63YAi2cwz7y85RsjfFCHD4WZ8iwnySIMOa53YHB5NYb42wYwUqCPI8k7vPlEb4a3lfy00JbDdwMqu',
@@ -857,7 +945,7 @@
     async function fetchProducts() {
         try {
             const response = await fetch('/api/products');
-            if (!response.ok) throw new Error('Netzwerkfehler');
+            if (!response.ok) throw new Error(t('networkError'));
             
             const data = await response.json();
             products = data.map((p, index) => ({
@@ -879,8 +967,8 @@
             document.getElementById('productsGrid').innerHTML = `
                 <div class="error-state" style="grid-column: 1/-1;">
                     <i data-lucide="alert-circle" style="width: 48px; height: 48px; opacity: 0.5;"></i>
-                    <p>Produkte konnten nicht geladen werden.</p>
-                    <button onclick="fetchProducts()">Erneut versuchen</button>
+                    <p data-i18n="productsError">Produkte konnten nicht geladen werden.</p>
+                    <button onclick="fetchProducts()" data-i18n="productsRetry">Erneut versuchen</button>
                 </div>
             `;
             lucide.createIcons();
@@ -932,7 +1020,7 @@
         const filtered = filter === 'all' ? products : products.filter(p => p.category === filter);
         
         if (filtered.length === 0) {
-            grid.innerHTML = '<div class="error-state" style="grid-column: 1/-1;"><p>Keine Produkte in dieser Kategorie.</p></div>';
+            grid.innerHTML = '<div class="error-state" style="grid-column: 1/-1;"><p data-i18n="productsEmpty">Keine Produkte in dieser Kategorie.</p></div>';
             return;
         }
         
@@ -952,8 +1040,8 @@
                     </div>
                     <div class="product-footer">
                         <div class="product-price">€${product.price.toFixed(2)}</div>
-                        <button class="add-to-cart" onclick="addToCart(${product.id})" aria-label="${escapeHtml(product.title)} in den Warenkorb legen">
-                            <i data-lucide="shopping-cart" style="width: 16px; height: 16px;" aria-hidden="true"></i> In den Warenkorb
+                        <button class="add-to-cart" onclick="addToCart(${product.id})" aria-label="${escapeHtml(product.title)} ${t('addToCartAriaLabel')}">
+                            <i data-lucide="shopping-cart" style="width: 16px; height: 16px;" aria-hidden="true"></i> <span>${t('addToCart')}</span>
                         </button>
                     </div>
                 </div>
@@ -1008,14 +1096,14 @@
         if (!product) return;
         
         if (cart.find(item => item.id === productId)) {
-            showToast(`${escapeHtml(product.title)} ist bereits im Warenkorb!`);
+            showToast(`${escapeHtml(product.title)} ${t('toastAlreadyInCart')}`);
             return;
         }
         
         cart.push(product);
         saveCart();
         updateCartUI(false);
-        showToast(`${escapeHtml(product.title)} wurde hinzugefügt!`);
+        showToast(`${escapeHtml(product.title)} ${t('toastAdded')}`);
         
         const cartBtn = document.querySelector('.cart-btn');
         cartBtn.style.transform = 'scale(1.2)';
@@ -1047,7 +1135,7 @@
             cartItems.innerHTML = `
                 <div class="cart-empty">
                     <i data-lucide="shopping-cart" aria-hidden="true"></i>
-                    <p>Dein Warenkorb ist leer</p>
+                    <p data-i18n="cartEmpty">Dein Warenkorb ist leer</p>
                 </div>
             `;
             checkoutBtn.disabled = true;
@@ -1109,7 +1197,7 @@
         
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
-            errorEl.textContent = 'Bitte gib eine gültige E-Mail-Adresse ein.';
+            errorEl.textContent = t('emailInvalid');
             errorEl.style.display = 'block';
             return;
         }
@@ -1122,7 +1210,7 @@
     async function checkout(customerEmail) {
         // NEU: Prüfe ob Stripe bereit ist
         if (!stripeReady || !stripe) {
-            showToast('Zahlungssystem wird initialisiert... Bitte warte einen Moment.');
+            showToast(t('stripeNotReady'));
             console.error('Stripe nicht bereit:', { stripeReady, stripe: !!stripe });
             return;
         }
@@ -1165,7 +1253,7 @@
             
         } catch (error) {
             console.error('Checkout Fehler:', error);
-            showToast('Fehler beim Checkout: ' + escapeHtml(error.message));
+            showToast(t('checkoutError') + escapeHtml(error.message));
             
             btn.innerHTML = originalText;
             btn.disabled = false;
@@ -1184,13 +1272,4 @@
         }, 3000);
     }
 
-    function scrollToProducts() {
-        document.getElementById('products').scrollIntoView({ behavior: 'smooth' });
-    }
-
-    function showPreview() {
-        showToast('Vorschau wird geladen...');
-    }
-</script>
-</body>
-</html>
+    functi

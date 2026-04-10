@@ -1,7 +1,7 @@
 require('dotenv').config();
 
 // Pflicht-Umgebungsvariablen prüfen
-const required = ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET', 'GMAIL_USER', 'GMAIL_APP_PASSWORD'];
+const required = ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET', 'GMAIL_USER', 'GMAIL_APP_PASSWORD', 'APP_URL'];
 required.forEach(key => {
   if (!process.env[key]) throw new Error(`Fehlende Umgebungsvariable: ${key}`);
 });
@@ -17,17 +17,41 @@ const rateLimit = require('express-rate-limit');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ✅ HIER: Download-Tracker (nach const app = express())
-const downloadTracker = new Map();
+// ✅ PERSISTENTER Download-Tracker (JSON-Datei)
+const TRACKER_FILE = path.join(__dirname, 'download-tracker.json');
+
+function loadTracker() {
+  try {
+    if (fs.existsSync(TRACKER_FILE)) {
+      const raw = fs.readFileSync(TRACKER_FILE, 'utf8');
+      return JSON.parse(raw);
+    }
+  } catch (err) {
+    console.error('⚠️ Tracker-Datei konnte nicht geladen werden:', err.message);
+  }
+  return {};
+}
+
+function saveTracker(tracker) {
+  try {
+    fs.writeFileSync(TRACKER_FILE, JSON.stringify(tracker, null, 2), 'utf8');
+  } catch (err) {
+    console.error('⚠️ Tracker-Datei konnte nicht gespeichert werden:', err.message);
+  }
+}
+
+// Beim Start laden
+let downloadTracker = loadTracker();
 
 // Hilfsfunktion: Alte Downloads aufräumen
 function cleanupOldDownloads() {
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-  for (const [sessionId, data] of downloadTracker.entries()) {
-    if (data.timestamp < thirtyDaysAgo) {
-      downloadTracker.delete(sessionId);
+  for (const sessionId of Object.keys(downloadTracker)) {
+    if (new Date(downloadTracker[sessionId].timestamp) < thirtyDaysAgo) {
+      delete downloadTracker[sessionId];
     }
   }
+  saveTracker(downloadTracker);
 }
 
 // Nodemailer Transporter mit Gmail
@@ -179,7 +203,7 @@ app.post('/api/webhook', express.raw({type: 'application/json'}), async (req, re
     
     if (!email) {
       console.error('❌ Keine E-Mail im Session Object gefunden');
-      return res.json({received: true});
+      return res.status(400).json({ error: "Keine E-Mail gefunden" });
     }
 
     try {
@@ -190,7 +214,7 @@ app.post('/api/webhook', express.raw({type: 'application/json'}), async (req, re
         html: `
           <h1>Vielen Dank für deinen Kauf!</h1>
           <p>Du hast <strong>Mixing EQ Cheat Sheet</strong> erfolgreich gekauft.</p>
-          <p><a href="https://taghiwaves.onrender.com/api/download/mixing-eq-guide?session_id=${session.id}" 
+          <p><a href="${process.env.APP_URL}/api/download/mixing-eq-guide?session_id=${session.id}" 
                 style="background:#00f0ff; color:#000; padding:12px 24px; text-decoration:none; border-radius:8px; display:inline-block; margin:20px 0;">
                 Jetzt herunterladen
              </a></p>
@@ -202,6 +226,7 @@ app.post('/api/webhook', express.raw({type: 'application/json'}), async (req, re
       console.log('📧 E-Mail gesendet an:', email);
     } catch (error) {
       console.error('❌ E-Mail Fehler:', error);
+      return res.status(500).json({ error: 'E-Mail Versand fehlgeschlagen' });
     }
   }
 
@@ -223,7 +248,7 @@ app.get('/api/download/mixing-eq-guide', limiter, async (req, res) => {
   }
   
   // Prüfen ob bereits heruntergeladen
-  const tracker = downloadTracker.get(sessionId);
+  const tracker = downloadTracker[sessionId];
   if (tracker?.downloaded) {
     return res.status(403).send(`
       <html>
@@ -262,11 +287,12 @@ app.get('/api/download/mixing-eq-guide', limiter, async (req, res) => {
     }
     
     // Als heruntergeladen markieren (BEVOR der Download startet)
-    downloadTracker.set(sessionId, { 
+    downloadTracker[sessionId] = { 
       downloaded: true, 
       timestamp: new Date(),
       email: session.customer_details?.email || session.customer_email 
-    });
+    };
+    saveTracker(downloadTracker);
     
     // Alte Einträge aufräumen
     cleanupOldDownloads();
@@ -320,8 +346,8 @@ app.post('/api/create-checkout-session', limiter, async (req, res) => {
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
-      success_url: `${req.headers.origin}/success.html?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.origin}/cancel.html`,
+      success_url: `${process.env.APP_URL}/success.html?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.APP_URL}/cancel.html`,
       automatic_tax: { enabled: true },
     };
 
