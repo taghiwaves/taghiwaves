@@ -1044,7 +1044,15 @@ const translations = {
         if (name.includes('Mastering')) return 'mastering';
         if (name.includes('Template')) return 'templates';
         return 'production';
-    
+    }
+
+    function getPages(name) {
+        if (name.includes('Handbook')) return '150 Səhifə';
+        if (name.includes('Workflow')) return '80 Səhifə';
+        if (name.includes('Masterclass')) return '100 Səhifə';
+        if (name.includes('Templates')) return '5 Templates';
+        if (name.includes('Bible')) return '90 Səhifə';
+        return '7 Səhifə';
     }
 
     function getFormat(name) {
