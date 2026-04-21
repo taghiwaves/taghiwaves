@@ -88,7 +88,8 @@ const products = [
     id: "prod_yeni_sesler",
     name: "Yeni səslərin yaradılması",
     price: 50,
-    description: "Bir prodüksiyanın səs mənzərəsi kompozisiya və aranjimanla yanaşı həm də musiqi əsərinin xarakterik xüsusiyyətlərindən biri sayıldığı üçün, bir prodüser kimi fərdi səslərə sahib olmağa çalışmaq lazımdır. Bu fəsildə mən sizə öz şəxsi səslərinizi yarada biləcəyiniz bəzi texnikaları göstərirəm."
+    description: "Bir prodüksiyanın səs mənzərəsi kompozisiya və aranjimanla yanaşı həm də musiqi əsərinin xarakterik xüsusiyyətlərindən biri sayıldığı üçün, bir prodüser kimi fərdi səslərə sahib olmağa çalışmaq lazımdır. Bu fəsildə mən sizə öz şəxsi səslərinizi yarada biləcəyiniz bəzi texnikaları göstərirəm.",
+    image: "https://drive.google.com/uc?export=view&id=1RmsVC2ydQt-RRk5UfyLYTLyL_2f9aPEq"
   }
 ];
 
