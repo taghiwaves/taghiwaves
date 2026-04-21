@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de" id="htmlRoot">
+<html lang="az" id="htmlRoot">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -605,25 +605,6 @@
             }
         }
 
-        /* Language Switcher */
-        .lang-switcher {
-            display: flex;
-            gap: 0.4rem;
-            align-items: center;
-        }
-        .lang-btn {
-            background: none;
-            border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 6px;
-            padding: 0.3rem 0.5rem;
-            cursor: pointer;
-            font-size: 1.1rem;
-            line-height: 1;
-            transition: all 0.2s;
-            opacity: 0.5;
-        }
-        .lang-btn:hover { opacity: 0.85; border-color: rgba(0,240,255,0.4); }
-        .lang-btn.active { opacity: 1; border-color: var(--neon-cyan); box-shadow: 0 0 8px rgba(0,240,255,0.25); }
     </style>
     <script src="translations.js"></script>
 </head>
@@ -657,12 +638,7 @@
             <a href="#about" data-i18n="navAbout">Über mich</a>
         </div>
         
-        <div class="lang-switcher" aria-label="Sprache wählen">
-            <button class="lang-btn active" onclick="setLanguage('de')" title="Deutsch" data-lang="de">🇩🇪</button>
-            <button class="lang-btn" onclick="setLanguage('en')" title="English" data-lang="en">🇬🇧</button>
-            <button class="lang-btn" onclick="setLanguage('az')" title="Azərbaycan" data-lang="az">🇦🇿</button>
-        </div>
-                <button class="cart-btn" onclick="toggleCart()" aria-label="Warenkorb öffnen" data-i18n-aria-label="cartAriaLabel" aria-haspopup="dialog" aria-expanded="false" aria-controls="cartSidebar" id="cartToggle">
+        <button class="cart-btn" onclick="toggleCart()" aria-label="Warenkorb öffnen" data-i18n-aria-label="cartAriaLabel" aria-haspopup="dialog" aria-expanded="false" aria-controls="cartSidebar" id="cartToggle">
             <i data-lucide="shopping-cart" aria-hidden="true"></i>
             <span data-i18n="navCart">Warenkorb</span>
             <span class="cart-count" id="cartCount" aria-live="polite" style="display: none;">0</span>
@@ -737,7 +713,7 @@
     <footer id="about" role="contentinfo">
         <div class="footer-logo">taghiwaves</div>
         <p data-i18n="footerRights">© 2026 taghiwaves. Alle Rechte vorbehalten.</p>
-        <p style="margin-top: 0.5rem; font-size: 0.875rem;">Kontakt: <a href="mailto:hello@taghiwaves.com">hello@taghiwaves.com</a></p>
+        <p style="margin-top: 0.5rem; font-size: 0.875rem;">Kontakt: <a href="mailto:taghiwaves@gmail.com">taghiwaves@gmail.com</a></p>
     </footer>
 
     <!-- Warenkorb Sidebar -->
@@ -808,7 +784,7 @@
     // 🌍 I18N ENGINE
     // ============================================
 
-    let currentLang = localStorage.getItem('taghiwaves_lang') || 'de';
+    let currentLang = localStorage.getItem('taghiwaves_lang') || 'az';
 
     function setLanguage(lang) {
         if (!translations[lang]) return;
@@ -861,7 +837,7 @@
 
     // Hilfsfunktion: aktuellen Übersetzungstext holen
     function t(key) {
-        return (translations[currentLang] && translations[currentLang][key]) || translations['de'][key] || key;
+        return (translations[currentLang] && translations[currentLang][key]) || translations['az'][key] || key;
     }
 
 </script><script>
