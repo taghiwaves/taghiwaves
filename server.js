@@ -85,10 +85,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Produkte
 const products = [
   {
-    id: "prod_cheat",
-    name: "Mixing EQ Cheat Sheet",
+    id: "prod_yeni_sesler",
+    name: "Yeni səslərin yaradılması",
     price: 50,
-    description: "Schnellreferenz für EQ-Einstellungen aller Instrumente. PDF-Download."
+    description: "Bir prodüksiyanın səs mənzərəsi kompozisiya və aranjimanla yanaşı həm də musiqi əsərinin xarakterik xüsusiyyətlərindən biri sayıldığı üçün, bir prodüser kimi fərdi səslərə sahib olmağa çalışmaq lazımdır. Bu fəsildə mən sizə öz şəxsi səslərinizi yarada biləcəyiniz bəzi texnikaları göstərirəm."
   }
 ];
 
@@ -210,17 +210,17 @@ app.post('/api/webhook', express.raw({type: 'application/json'}), async (req, re
       await transporter.sendMail({
         from: `"taghiwaves" <${process.env.GMAIL_USER}>`,
         to: email,
-        subject: 'Dein taghiwaves Download ist bereit!',
+        subject: 'taghiwaves yükləməyə hazırdır!',
         html: `
-          <h1>Vielen Dank für deinen Kauf!</h1>
-          <p>Du hast <strong>Mixing EQ Cheat Sheet</strong> erfolgreich gekauft.</p>
-          <p><a href="${process.env.APP_URL}/api/download/mixing-eq-guide?session_id=${session.id}" 
+          <h1>Satın aldığınız üçün təşəkkür edirik!</h1>
+          <p>Siz <strong>Yeni səslərin yaradılması</strong> uğurla satın aldınız.</p>
+          <p><a href="${process.env.APP_URL}/api/download/yeni-sesler?session_id=${session.id}" 
                 style="background:#00f0ff; color:#000; padding:12px 24px; text-decoration:none; border-radius:8px; display:inline-block; margin:20px 0;">
-                Jetzt herunterladen
+                İndi yüklə
              </a></p>
-          <p>Bei Fragen antworte einfach auf diese E-Mail.</p>
+          <p>Suallarınız üçün bu e-poçta cavab verin.</p>
           <br>
-          <p>taghiwaves Team</p>
+          <p>taghiwaves Komandası</p>
         `
       });
       console.log('📧 E-Mail gesendet an:', email);
@@ -240,7 +240,7 @@ app.use(express.json());
 // 🛡️ DOWNLOAD-ROUTE MIT DATEI-PRÜFUNG
 // ============================================
 
-app.get('/api/download/mixing-eq-guide', limiter, async (req, res) => {
+app.get('/api/download/yeni-sesler', limiter, async (req, res) => {
   const sessionId = req.query.session_id;
   
   if (!sessionId) {
@@ -269,7 +269,7 @@ app.get('/api/download/mixing-eq-guide', limiter, async (req, res) => {
       return res.status(403).send('Zahlung nicht bestätigt.');
     }
     
-    const filePath = path.join(__dirname, 'public', 'downloads', 'mixing-eq-guide.pdf');
+    const filePath = path.join(__dirname, 'public', 'downloads', 'yeni-sesler.pdf');
     
     // ✅ NEU: Prüfe ob Datei existiert BEVOR Download
     if (!fs.existsSync(filePath)) {
@@ -297,7 +297,7 @@ app.get('/api/download/mixing-eq-guide', limiter, async (req, res) => {
     // Alte Einträge aufräumen
     cleanupOldDownloads();
     
-    res.download(filePath, 'Mixing-EQ-Cheat-Sheet.pdf');
+    res.download(filePath, 'Yeni səslərin yaradılması.pdf');
     
   } catch (error) {
     console.error('Download-Fehler:', error);

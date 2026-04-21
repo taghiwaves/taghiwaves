@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zahlung erfolgreich - TaghiWaves</title>
+    <title>Ödəniş uğurlu oldu - TaghiWaves</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -89,17 +89,17 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
             </svg>
         </div>
-        <h1>Zahlung erfolgreich!</h1>
-        <p>Vielen Dank für deinen Kauf. Dein Dokument ist bereit zum Download.</p>
+        <h1>Ödəniş uğurlu oldu!</h1>
+        <p>Satın aldığınız üçün təşəkkür edirik. Sənədiniz yükləməyə hazırdır.</p>
         
         <a href="#" class="download-btn" id="downloadBtn">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            Jetzt herunterladen
+            İndi yüklə
         </a>
         
-        <a href="/" class="home-link">← Zurück zur Startseite</a>
+        <a href="/" class="home-link">← Ana səhifəyə qayıt</a>
     </div>
 
     <script>
@@ -109,10 +109,10 @@
         
         if (sessionId) {
             // Download-Link mit Session-ID
-            document.getElementById('downloadBtn').href = `/api/download/mixing-eq-guide?session_id=${sessionId}`;
+            document.getElementById('downloadBtn').href = `/api/download/yeni-sesler?session_id=${sessionId}`;
         } else {
             document.getElementById('downloadBtn').style.display = 'none';
-            document.querySelector('p').textContent = 'Fehler: Keine gültige Session gefunden.';
+            document.querySelector('p').textContent = 'Xəta: Etibarlı sessiya tapılmadı.';
         }
     </script>
 </body>
