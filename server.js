@@ -90,6 +90,13 @@ const products = [
     price: 50,
     description: "Bir prodüksiyanın səs mənzərəsi kompozisiya və aranjimanla yanaşı həm də musiqi əsərinin xarakterik xüsusiyyətlərindən biri sayıldığı üçün, bir prodüser kimi fərdi səslərə sahib olmağa çalışmaq lazımdır. Bu fəsildə mən sizə öz şəxsi səslərinizi yarada biləcəyiniz bəzi texnikaları göstərirəm.",
     image: "/assets/yeni-sesler.jpg"
+  },
+  {
+    id: "prod_dabstep",
+    name: "Dabstep səhnəsindən yeni səslər",
+    price: 50,
+    description: "Dabstepin (Dubstep) böyük uğuru musiqi dünyasına yeni bir nəfəs gətirdi. Bir tərəfdən, Britaniya andeqraundundan gələn bu musiqi tərzi bizə yeni növ qruvlar (grooves) bəxş etdi. Beləliklə, popdan rəqs musiqisinə, hətta metala qədər, dabstepin o qəribə, ağır sürünən \"halftime\" ritmikası tərəfindən mənimsənilməyən demək olar ki, heç bir janr qalmadı.",
+    image: null
   }
 ];
 
@@ -208,14 +215,28 @@ app.post('/api/webhook', express.raw({type: 'application/json'}), async (req, re
     }
 
     try {
+      // Gekauftes Produkt aus Line Items ermitteln
+      const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+      const productName = lineItems.data[0]?.description || '';
+      
+      let downloadUrl = '';
+      let productTitle = '';
+      if (productName.includes('Dabstep')) {
+        downloadUrl = `${process.env.APP_URL}/api/download/dabstep?session_id=${session.id}`;
+        productTitle = 'Dabstep səhnəsindən yeni səslər';
+      } else {
+        downloadUrl = `${process.env.APP_URL}/api/download/yeni-sesler?session_id=${session.id}`;
+        productTitle = 'Yeni səslərin yaradılması';
+      }
+
       await transporter.sendMail({
         from: `"taghiwaves" <${process.env.GMAIL_USER}>`,
         to: email,
         subject: 'taghiwaves yükləməyə hazırdır!',
         html: `
           <h1>Satın aldığınız üçün təşəkkür edirik!</h1>
-          <p>Siz <strong>Yeni səslərin yaradılması</strong> uğurla satın aldınız.</p>
-          <p><a href="${process.env.APP_URL}/api/download/yeni-sesler?session_id=${session.id}" 
+          <p>Siz <strong>${productTitle}</strong> uğurla satın aldınız.</p>
+          <p><a href="${downloadUrl}" 
                 style="background:#00f0ff; color:#000; padding:12px 24px; text-decoration:none; border-radius:8px; display:inline-block; margin:20px 0;">
                 İndi yüklə
              </a></p>
@@ -299,6 +320,66 @@ app.get('/api/download/yeni-sesler', limiter, async (req, res) => {
     cleanupOldDownloads();
     
     res.download(filePath, 'Yeni səslərin yaradılması.pdf');
+    
+  } catch (error) {
+    console.error('Download-Fehler:', error);
+    res.status(500).send('Download-Fehler: ' + error.message);
+  }
+});
+
+app.get('/api/download/dabstep', limiter, async (req, res) => {
+  const sessionId = req.query.session_id;
+  
+  if (!sessionId) {
+    return res.status(403).send('Zugriff verweigert. Bitte erst kaufen.');
+  }
+  
+  const tracker = downloadTracker[sessionId];
+  if (tracker?.downloaded) {
+    return res.status(403).send(`
+      <html>
+        <head><title>Yükləmə artıq istifadə edilib</title></head>
+        <body style="font-family: Arial; text-align: center; padding: 50px; background: #0a0a0f; color: #fff;">
+          <h1>⚠️ Yükləmə artıq istifadə edilib</h1>
+          <p>Bu link artıq bir dəfə istifadə edilib.</p>
+          <p style="color: #00f0ff;">Problemlər üçün bizimlə əlaqə saxlayın: hello@taghiwaves.com</p>
+        </body>
+      </html>
+    `);
+  }
+  
+  try {
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    
+    if (session.payment_status !== 'paid') {
+      return res.status(403).send('Ödəniş təsdiqlənmədi.');
+    }
+    
+    const filePath = path.join(__dirname, 'public', 'downloads', 'dabstep.pdf');
+    
+    if (!fs.existsSync(filePath)) {
+      console.error('❌ Datei nicht gefunden:', filePath);
+      return res.status(404).send(`
+        <html>
+          <head><title>Fayl mövcud deyil</title></head>
+          <body style="font-family: Arial; text-align: center; padding: 50px; background: #0a0a0f; color: #fff;">
+            <h1>❌ Fayl mövcud deyil</h1>
+            <p>Fayl tapılmadı. Zəhmət olmasa dəstək xidməti ilə əlaqə saxlayın.</p>
+            <p style="color: #00f0ff;">E-poçt: hello@taghiwaves.com</p>
+          </body>
+        </html>
+      `);
+    }
+    
+    downloadTracker[sessionId] = { 
+      downloaded: true, 
+      timestamp: new Date(),
+      email: session.customer_details?.email || session.customer_email 
+    };
+    saveTracker(downloadTracker);
+    cleanupOldDownloads();
+    
+    res.download(filePath, 'Dabstep səhnəsindən yeni səslər.pdf');
     
   } catch (error) {
     console.error('Download-Fehler:', error);
