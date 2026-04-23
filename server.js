@@ -96,7 +96,7 @@ const products = [
     name: "Dabstep səhnəsindən yeni səslər",
     price: 50,
     description: "Dabstepin (Dubstep) böyük uğuru musiqi dünyasına yeni bir nəfəs gətirdi. Bir tərəfdən, Britaniya andeqraundundan gələn bu musiqi tərzi bizə yeni növ qruvlar (grooves) bəxş etdi. Beləliklə, popdan rəqs musiqisinə, hətta metala qədər, dabstepin o qəribə, ağır sürünən \"halftime\" ritmikası tərəfindən mənimsənilməyən demək olar ki, heç bir janr qalmadı.",
-    image: null
+    image: "/assets/dubstep.png"
   }
 ];
 
