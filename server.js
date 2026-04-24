@@ -449,6 +449,66 @@ app.post('/api/create-checkout-session', limiter, async (req, res) => {
 });
 
 // ============================================
+// PREVIEW ROUTE
+// ============================================
+
+const { fromPath } = require('pdf2pic');
+const sharp = require('sharp');
+
+const PREVIEW_PRODUCTS = {
+  'yeni-sesler': path.join(__dirname, 'public', 'downloads', 'yeni-sesler.pdf'),
+  'dabstep':     path.join(__dirname, 'public', 'downloads', 'dabstep.pdf'),
+};
+
+const previewCache = {}; // { productId: [base64, base64] }
+
+app.get('/api/preview/:productId', limiter, async (req, res) => {
+  const { productId } = req.params;
+
+  if (!PREVIEW_PRODUCTS[productId]) {
+    return res.status(404).json({ error: 'Məhsul tapılmadı.' });
+  }
+
+  // Cache-Hit
+  if (previewCache[productId]) {
+    return res.json({ images: previewCache[productId] });
+  }
+
+  const pdfPath = PREVIEW_PRODUCTS[productId];
+
+  if (!fs.existsSync(pdfPath)) {
+    return res.status(404).json({ error: 'PDF faylı tapılmadı.' });
+  }
+
+  try {
+    const converter = fromPath(pdfPath, {
+      density: 120,
+      format: 'png',
+      width: 800,
+      height: 1131,
+      preserveAspectRatio: true,
+    });
+
+    const images = [];
+    for (let page = 1; page <= 2; page++) {
+      const result = await converter(page, { responseType: 'buffer' });
+      const blurred = await sharp(result.buffer)
+        .blur(18)
+        .png()
+        .toBuffer();
+      images.push('data:image/png;base64,' + blurred.toString('base64'));
+    }
+
+    previewCache[productId] = images;
+    res.json({ images });
+
+  } catch (error) {
+    console.error('❌ Preview xətası:', error);
+    res.status(500).json({ error: 'Önizləmə yaradıla bilmədi.' });
+  }
+});
+
+// ============================================
 // CONTACT FORM
 // ============================================
 
