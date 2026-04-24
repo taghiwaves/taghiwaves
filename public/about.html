@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Haqqımda - taghiwaves</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-cyan: #00f0ff;
+            --neon-purple: #b829dd;
+            --dark-bg: #0a0a0f;
+            --card-bg: #12121a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--dark-bg);
+            color: #fff;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif; }
+
+        .bg-gradient {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background:
+                radial-gradient(ellipse at 20% 20%, rgba(184, 41, 221, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(0, 240, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(184, 41, 221, 0.05) 0%, transparent 70%);
+            animation: bgPulse 8s ease-in-out infinite;
+        }
+
+        @keyframes bgPulse { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; } }
+
+        .grid-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+        }
+
+        /* NAV */
+        nav {
+            position: fixed; top: 0; width: 100%; padding: 1.5rem 3rem;
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 1000;
+            background: rgba(10, 10, 15, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .logo {
+            font-family: 'Space Grotesk', sans-serif; font-size: 1.5rem; font-weight: 700;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        .nav-links { display: flex; gap: 2rem; align-items: center; }
+
+        .nav-links a {
+            color: rgba(255,255,255,0.7); text-decoration: none; font-weight: 500;
+            transition: color 0.3s; position: relative;
+        }
+
+        .nav-links a:hover, .nav-links a.active { color: var(--neon-cyan); }
+
+        .nav-links a::after {
+            content: ''; position: absolute; bottom: -5px; left: 0;
+            width: 0; height: 2px;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover::after, .nav-links a.active::after { width: 100%; }
+
+        /* MAIN */
+        main {
+            padding-top: 8rem;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding-left: 2rem;
+            padding-right: 2rem;
+            padding-bottom: 6rem;
+        }
+
+        /* HERO SECTION */
+        .about-hero {
+            display: grid;
+            grid-template-columns: 1fr 1.3fr;
+            gap: 5rem;
+            align-items: center;
+            margin-bottom: 6rem;
+        }
+
+        .photo-wrapper {
+            position: relative;
+        }
+
+        .photo-wrapper::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+            z-index: 0;
+            opacity: 0.7;
+        }
+
+        .photo-wrapper::after {
+            content: '';
+            position: absolute;
+            inset: -20px;
+            border-radius: 30px;
+            background: linear-gradient(135deg, rgba(0,240,255,0.1), rgba(184,41,221,0.1));
+            z-index: -1;
+            filter: blur(20px);
+        }
+
+        .photo-wrapper img {
+            width: 100%;
+            border-radius: 22px;
+            display: block;
+            position: relative;
+            z-index: 1;
+            filter: grayscale(20%);
+            transition: filter 0.4s;
+        }
+
+        .photo-wrapper:hover img { filter: grayscale(0%); }
+
+        .about-intro {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .about-badge {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.4rem 1rem;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 50px;
+            font-size: 0.8rem; color: var(--neon-cyan);
+            width: fit-content;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .about-intro h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            line-height: 1.1;
+            background: linear-gradient(135deg, #fff 60%, rgba(255,255,255,0.5));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .about-intro h1 span {
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .about-intro .tagline {
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.6);
+            line-height: 1.7;
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 2rem;
+            padding-top: 0.5rem;
+        }
+
+        .stat {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .stat-number {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.45);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* BIO SECTION */
+        .bio-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .bio-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: border-color 0.3s, transform 0.3s;
+        }
+
+        .bio-card:hover {
+            border-color: rgba(0,240,255,0.2);
+            transform: translateY(-4px);
+        }
+
+        .bio-card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .bio-card-icon {
+            width: 48px; height: 48px;
+            background: linear-gradient(135deg, rgba(0,240,255,0.1), rgba(184,41,221,0.1));
+            border: 1px solid rgba(0,240,255,0.2);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 1.25rem;
+            font-size: 1.4rem;
+        }
+
+        .bio-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            color: white;
+        }
+
+        .bio-card p {
+            color: rgba(255,255,255,0.55);
+            line-height: 1.75;
+            font-size: 0.9375rem;
+        }
+
+        /* GENRES */
+        .genres-section {
+            margin-bottom: 4rem;
+        }
+
+        .section-label {
+            font-size: 0.8rem;
+            color: var(--neon-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1.5rem;
+        }
+
+        .genres-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .genre-tag {
+            padding: 0.5rem 1.25rem;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 50px;
+            font-size: 0.875rem;
+            color: rgba(255,255,255,0.7);
+            transition: all 0.3s;
+        }
+
+        .genre-tag:hover {
+            border-color: var(--neon-cyan);
+            color: var(--neon-cyan);
+            background: rgba(0,240,255,0.05);
+        }
+
+        /* CTA */
+        .cta-section {
+            background: var(--card-bg);
+            border: 1px solid rgba(0,240,255,0.15);
+            border-radius: 24px;
+            padding: 3rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(ellipse at center, rgba(0,240,255,0.04) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .cta-section h2 {
+            font-size: 1.75rem;
+            margin-bottom: 0.75rem;
+            background: linear-gradient(135deg, #fff, rgba(255,255,255,0.7));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .cta-section p {
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 2rem;
+            font-size: 1rem;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            display: inline-flex; align-items: center; gap: 0.75rem;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+            border: none; border-radius: 50px;
+            color: white; font-weight: 600; text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 40px rgba(0,240,255,0.25);
+        }
+
+        .btn-secondary {
+            display: inline-flex; align-items: center; gap: 0.75rem;
+            padding: 1rem 2rem;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.15); border-radius: 50px;
+            color: white; font-weight: 500; text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--neon-cyan);
+            color: var(--neon-cyan);
+            background: rgba(0,240,255,0.05);
+            transform: translateY(-3px);
+        }
+
+        /* FOOTER */
+        footer {
+            padding: 3rem 2rem; text-align: center;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.4);
+        }
+
+        .footer-logo {
+            font-family: 'Space Grotesk', sans-serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        footer a { color: rgba(255,255,255,0.4); text-decoration: none; transition: color 0.3s; }
+        footer a:hover { color: var(--neon-cyan); }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            nav { padding: 1rem; }
+            .about-hero { grid-template-columns: 1fr; gap: 2.5rem; }
+            .photo-wrapper { max-width: 280px; margin: 0 auto; }
+            .about-intro h1 { font-size: 2.25rem; }
+            .bio-section { grid-template-columns: 1fr; }
+            .bio-card.full-width { grid-column: 1; }
+            .stats-row { gap: 1.25rem; }
+            main { padding-top: 6rem; }
+        }
+
+        /* Fade-in animation */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(24px);
+            animation: fadeInUp 0.7s ease forwards;
+        }
+
+        .fade-in:nth-child(2) { animation-delay: 0.1s; }
+        .fade-in:nth-child(3) { animation-delay: 0.2s; }
+        .fade-in:nth-child(4) { animation-delay: 0.3s; }
+
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-gradient"></div>
+    <div class="grid-overlay"></div>
+
+    <nav>
+        <a href="/" class="logo">⟁ taghiwaves</a>
+        <div class="nav-links">
+            <a href="/#products">Sənədlər</a>
+            <a href="/#features">Üstünlüklər</a>
+            <a href="/about.html" class="active">Haqqımda</a>
+        </div>
+    </nav>
+
+    <main>
+        <!-- HERO -->
+        <section class="about-hero">
+            <div class="photo-wrapper fade-in">
+                <img src="/assets/profile.jpg" alt="taghiwaves - Musiqi prodüseri">
+            </div>
+            <div class="about-intro">
+                <div class="about-badge fade-in">⟁ Mix & Mastering Mühəndisi</div>
+                <h1 class="fade-in">Səsin arxasındakı <span>hekayə</span></h1>
+                <p class="tagline fade-in">
+                    Mənim üçün musiqi sadəcə texniki proses deyil — hisslərin səsə çevrilməsi, ideyanın dinləyiciyə çatdırılmasıdır.
+                </p>
+                <div class="stats-row fade-in">
+                    <div class="stat">
+                        <span class="stat-number">SGD</span>
+                        <span class="stat-label">Almaniya Təhsili</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">4+</span>
+                        <span class="stat-label">Janr</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">∞</span>
+                        <span class="stat-label">Detal Diqqəti</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- BIO CARDS -->
+        <section class="bio-section">
+            <div class="bio-card fade-in">
+                <div class="bio-card-icon">🎚️</div>
+                <h3>Prodaksiya Fəlsəfəm</h3>
+                <p>Hər trekin arxasında bir hekayə olduğuna inanıram. Məqsədim həmin hekayəni mümkün olan ən təmiz və güclü formada eşidilən etməkdir. Texniki dəqiqliklə emosional dərinliyi bir arada saxlamaq — bu mənim əsas prioritetimdir.</p>
+            </div>
+            <div class="bio-card fade-in">
+                <div class="bio-card-icon">🎓</div>
+                <h3>Təhsil & İnkişaf</h3>
+                <p>Bilik və bacarıqlarımı Almaniyada yerləşən SGD Fernschule (Studiengemeinschaft Darmstadt) çərçivəsində peşəkar şəkildə inkişaf etdirmişəm. Qazandığım akademik və praktik biliklər müasir prodaksiya, mix və mastering standartlarını işimdə tətbiq etməyimə imkan verir.</p>
+            </div>
+            <div class="bio-card full-width fade-in">
+                <div class="bio-card-icon">🔊</div>
+                <h3>İş Prosesim</h3>
+                <p>Aranjimandan və sound design-dan başlayaraq mix və mastering mərhələsinə qədər bütün prosesi diqqətlə qururam. Məqsədim musiqinin həm qulaqcıqda, həm avtomobildə, həm də böyük səhnə sistemlərində eyni dərəcədə güclü səslənməsidir. Hər artist üçün fərqli həll axtarıram — standart şablon yoxdur.</p>
+            </div>
+        </section>
+
+        <!-- GENRES -->
+        <section class="genres-section fade-in">
+            <div class="section-label">İşlədiyim Janrlar</div>
+            <div class="genres-grid">
+                <span class="genre-tag">Elektron Musiqi</span>
+                <span class="genre-tag">Hip-Hop</span>
+                <span class="genre-tag">Pop</span>
+                <span class="genre-tag">Müasir Janrlar</span>
+                <span class="genre-tag">Sound Design</span>
+                <span class="genre-tag">Mix & Mastering</span>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="cta-section fade-in">
+            <h2>Birlikdə işləyək</h2>
+            <p>Musiqinizin beynəlxalq standartlara uyğun səslənməsini istəyirsinizsə — əlaqə saxlayın.</p>
+            <div class="cta-buttons">
+                <a href="mailto:taghiwaves@gmail.com" class="btn-primary">
+                    ✉ Əlaqə saxla
+                </a>
+                <a href="/#products" class="btn-secondary">
+                    Sənədlərə bax →
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-logo">taghiwaves</div>
+        <p>© 2026 taghiwaves. Bütün hüquqlar qorunur.</p>
+        <p style="margin-top: 0.5rem; font-size: 0.875rem;">Əlaqə: <a href="mailto:taghiwaves@gmail.com">taghiwaves@gmail.com</a></p>
+    </footer>
+</body>
+</html>
