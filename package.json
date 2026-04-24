@@ -17,7 +17,7 @@
     "express": "^4.21.2",
     "express-rate-limit": "^7.2.0",
     "nodemailer": "^8.0.5",
-    "pdfjs-dist": "^4.0.379",
+    "pdfjs-dist": "^3.11.174",
     "sharp": "^0.33.4",
     "stripe": "^14.25.0"
   },
