@@ -452,7 +452,6 @@ app.post('/api/create-checkout-session', limiter, async (req, res) => {
 // PREVIEW ROUTE
 // ============================================
 
-const { fromPath } = require('pdf2pic');
 const sharp = require('sharp');
 
 const PREVIEW_PRODUCTS = {
@@ -460,7 +459,32 @@ const PREVIEW_PRODUCTS = {
   'dabstep':     path.join(__dirname, 'public', 'downloads', 'dabstep.pdf'),
 };
 
-const previewCache = {}; // { productId: [base64, base64] }
+const previewCache = {};
+
+async function renderPdfPageToBuffer(pdfPath, pageNum) {
+  const { createCanvas } = require('@napi-rs/canvas');
+  const pdfjsLib = require('pdfjs-dist/legacy/build/pdf.js');
+
+  const data = new Uint8Array(fs.readFileSync(pdfPath));
+  const pdf = await pdfjsLib.getDocument({ data, useWorkerFetch: false, isEvalSupported: false }).promise;
+  const page = await pdf.getPage(pageNum);
+
+  const viewport = page.getViewport({ scale: 1.5 });
+  const canvas = createCanvas(viewport.width, viewport.height);
+  const context = canvas.getContext('2d');
+
+  await page.render({
+    canvasContext: context,
+    viewport,
+    canvasFactory: {
+      create: (w, h) => { const c = createCanvas(w, h); return { canvas: c, context: c.getContext('2d') }; },
+      reset: (obj, w, h) => { obj.canvas.width = w; obj.canvas.height = h; },
+      destroy: () => {}
+    }
+  }).promise;
+
+  return canvas.toBuffer('image/png');
+}
 
 app.get('/api/preview/:productId', limiter, async (req, res) => {
   const { productId } = req.params;
@@ -469,7 +493,6 @@ app.get('/api/preview/:productId', limiter, async (req, res) => {
     return res.status(404).json({ error: 'Məhsul tapılmadı.' });
   }
 
-  // Cache-Hit
   if (previewCache[productId]) {
     return res.json({ images: previewCache[productId] });
   }
@@ -481,21 +504,10 @@ app.get('/api/preview/:productId', limiter, async (req, res) => {
   }
 
   try {
-    const converter = fromPath(pdfPath, {
-      density: 120,
-      format: 'png',
-      width: 800,
-      height: 1131,
-      preserveAspectRatio: true,
-    });
-
     const images = [];
     for (let page = 1; page <= 2; page++) {
-      const result = await converter(page, { responseType: 'buffer' });
-      const blurred = await sharp(result.buffer)
-        .blur(18)
-        .png()
-        .toBuffer();
+      const buffer = await renderPdfPageToBuffer(pdfPath, page);
+      const blurred = await sharp(buffer).blur(18).png().toBuffer();
       images.push('data:image/png;base64,' + blurred.toString('base64'));
     }
 
