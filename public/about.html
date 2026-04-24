@@ -476,18 +476,40 @@
             </div>
         </section>
 
-        <!-- CTA -->
+        <!-- CTA / CONTACT FORM -->
         <section class="cta-section fade-in">
             <h2>Birlikdə işləyək</h2>
-            <p>Musiqinizin beynəlxalq standartlara uyğun səslənməsini istəyirsinizsə — əlaqə saxlayın.</p>
-            <div class="cta-buttons">
-                <a href="mailto:taghiwaves@gmail.com" class="btn-primary">
-                    ✉ Əlaqə saxla
-                </a>
-                <a href="/#products" class="btn-secondary">
-                    Sənədlərə bax →
-                </a>
-            </div>
+            <p>Musiqinizin beynəlxalq standartlara uyğun səslənməsini istəyirsinizsə — yazın.</p>
+
+            <form id="contactForm" style="max-width: 480px; margin: 2rem auto 0; text-align: left;">
+                <div style="margin-bottom: 1.25rem;">
+                    <label style="display:block; margin-bottom:0.5rem; color:rgba(255,255,255,0.7); font-size:0.875rem; font-weight:500;">Ad</label>
+                    <input type="text" id="contactName" placeholder="Adınız" required
+                        style="width:100%; padding:1rem; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; color:white; font-size:1rem; transition:border-color 0.3s; outline:none; font-family:'Inter',sans-serif;"
+                        onfocus="this.style.borderColor='#00f0ff'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+                </div>
+                <div style="margin-bottom: 1.25rem;">
+                    <label style="display:block; margin-bottom:0.5rem; color:rgba(255,255,255,0.7); font-size:0.875rem; font-weight:500;">E-poçt</label>
+                    <input type="email" id="contactEmail" placeholder="sizin@email.com" required
+                        style="width:100%; padding:1rem; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; color:white; font-size:1rem; transition:border-color 0.3s; outline:none; font-family:'Inter',sans-serif;"
+                        onfocus="this.style.borderColor='#00f0ff'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+                </div>
+                <div style="margin-bottom: 1.75rem;">
+                    <label style="display:block; margin-bottom:0.5rem; color:rgba(255,255,255,0.7); font-size:0.875rem; font-weight:500;">Mesaj</label>
+                    <textarea id="contactMessage" placeholder="Mesajınızı yazın..." rows="5" required
+                        style="width:100%; padding:1rem; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; color:white; font-size:1rem; transition:border-color 0.3s; outline:none; resize:vertical; font-family:'Inter',sans-serif;"
+                        onfocus="this.style.borderColor='#00f0ff'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'"></textarea>
+                </div>
+
+                <div id="contactError" style="display:none; color:#ff006e; margin-bottom:1rem; font-size:0.875rem;"></div>
+                <div id="contactSuccess" style="display:none; color:#00f0ff; margin-bottom:1rem; font-size:0.875rem;">✓ Mesajınız göndərildi! Tezliklə cavab verəcəyəm.</div>
+
+                <button type="button" onclick="submitContact()"
+                    id="contactBtn"
+                    style="width:100%; padding:1rem; background:linear-gradient(135deg,#00f0ff,#b829dd); border:none; border-radius:50px; color:white; font-weight:600; font-size:1rem; cursor:pointer; transition:all 0.3s; font-family:'Inter',sans-serif;">
+                    ✉ Göndər
+                </button>
+            </form>
         </section>
     </main>
 
@@ -496,5 +518,52 @@
         <p>© 2026 taghiwaves. Bütün hüquqlar qorunur.</p>
         <p style="margin-top: 0.5rem; font-size: 0.875rem;">Əlaqə: <a href="mailto:taghiwaves@gmail.com">taghiwaves@gmail.com</a></p>
     </footer>
+    <script>
+    async function submitContact() {
+        const name = document.getElementById('contactName').value.trim();
+        const email = document.getElementById('contactEmail').value.trim();
+        const message = document.getElementById('contactMessage').value.trim();
+        const errorEl = document.getElementById('contactError');
+        const successEl = document.getElementById('contactSuccess');
+        const btn = document.getElementById('contactBtn');
+
+        errorEl.style.display = 'none';
+        successEl.style.display = 'none';
+
+        if (!name) { errorEl.textContent = 'Zəhmət olmasa adınızı daxil edin.'; errorEl.style.display = 'block'; return; }
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { errorEl.textContent = 'Düzgün e-poçt ünvanı daxil edin.'; errorEl.style.display = 'block'; return; }
+        if (message.length < 10) { errorEl.textContent = 'Mesaj ən az 10 simvol olmalıdır.'; errorEl.style.display = 'block'; return; }
+
+        btn.textContent = 'Göndərilir...';
+        btn.disabled = true;
+        btn.style.opacity = '0.6';
+
+        try {
+            const res = await fetch('/api/contact', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, message })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                successEl.style.display = 'block';
+                document.getElementById('contactName').value = '';
+                document.getElementById('contactEmail').value = '';
+                document.getElementById('contactMessage').value = '';
+            } else {
+                errorEl.textContent = data.error || 'Xəta baş verdi.';
+                errorEl.style.display = 'block';
+            }
+        } catch (e) {
+            errorEl.textContent = 'Şəbəkə xətası. Yenidən cəhd edin.';
+            errorEl.style.display = 'block';
+        }
+
+        btn.textContent = '✉ Göndər';
+        btn.disabled = false;
+        btn.style.opacity = '1';
+    }
+    </script>
 </body>
 </html>

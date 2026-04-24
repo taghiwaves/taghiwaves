@@ -449,6 +449,45 @@ app.post('/api/create-checkout-session', limiter, async (req, res) => {
 });
 
 // ============================================
+// CONTACT FORM
+// ============================================
+
+app.post('/api/contact', limiter, async (req, res) => {
+  const { name, email, message } = req.body;
+
+  if (!isValidString(name, 1, 100)) {
+    return res.status(400).json({ error: 'Ad düzgün deyil.' });
+  }
+  if (!isValidEmail(email)) {
+    return res.status(400).json({ error: 'E-poçt ünvanı düzgün deyil.' });
+  }
+  if (!isValidString(message, 10, 2000)) {
+    return res.status(400).json({ error: 'Mesaj ən az 10 simvol olmalıdır.' });
+  }
+
+  try {
+    await transporter.sendMail({
+      from: `"taghiwaves Kontakt" <${process.env.GMAIL_USER}>`,
+      to: process.env.GMAIL_USER,
+      replyTo: email,
+      subject: `📩 Yeni mesaj: ${name}`,
+      html: `
+        <h2>Yeni əlaqə mesajı</h2>
+        <p><strong>Ad:</strong> ${name}</p>
+        <p><strong>E-poçt:</strong> ${email}</p>
+        <p><strong>Mesaj:</strong></p>
+        <p style="background:#f5f5f5; padding:1rem; border-radius:8px;">${message.replace(/\n/g, '<br>')}</p>
+      `
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('❌ Kontakt E-Mail xətası:', error);
+    res.status(500).json({ error: 'Mesaj göndərilə bilmədi. Zəhmət olmasa yenidən cəhd edin.' });
+  }
+});
+
+// ============================================
 // HEALTH CHECK
 // ============================================
 
