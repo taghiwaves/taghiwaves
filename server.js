@@ -452,72 +452,23 @@ app.post('/api/create-checkout-session', limiter, async (req, res) => {
 // PREVIEW ROUTE
 // ============================================
 
-const sharp = require('sharp');
-
 const PREVIEW_PRODUCTS = {
-  'yeni-sesler': path.join(__dirname, 'public', 'downloads', 'yeni-sesler.pdf'),
-  'dabstep':     path.join(__dirname, 'public', 'downloads', 'dabstep.pdf'),
+  'yeni-sesler': ['yeni-sesler-1.jpg', 'yeni-sesler-2.jpg'],
+  'dabstep':     ['dabstep-1.jpg', 'dabstep-2.jpg'],
 };
 
-const previewCache = {};
-
-async function renderPdfPageToBuffer(pdfPath, pageNum) {
-  const { createCanvas } = require('@napi-rs/canvas');
-  const pdfjsLib = require('pdfjs-dist/legacy/build/pdf.js');
-
-  const data = new Uint8Array(fs.readFileSync(pdfPath));
-  const pdf = await pdfjsLib.getDocument({ data, useWorkerFetch: false, isEvalSupported: false }).promise;
-  const page = await pdf.getPage(pageNum);
-
-  const viewport = page.getViewport({ scale: 1.5 });
-  const canvas = createCanvas(viewport.width, viewport.height);
-  const context = canvas.getContext('2d');
-
-  await page.render({
-    canvasContext: context,
-    viewport,
-    canvasFactory: {
-      create: (w, h) => { const c = createCanvas(w, h); return { canvas: c, context: c.getContext('2d') }; },
-      reset: (obj, w, h) => { obj.canvas.width = w; obj.canvas.height = h; },
-      destroy: () => {}
-    }
-  }).promise;
-
-  return canvas.toBuffer('image/png');
-}
-
-app.get('/api/preview/:productId', limiter, async (req, res) => {
+app.get('/api/preview/:productId', limiter, (req, res) => {
   const { productId } = req.params;
 
   if (!PREVIEW_PRODUCTS[productId]) {
     return res.status(404).json({ error: 'Məhsul tapılmadı.' });
   }
 
-  if (previewCache[productId]) {
-    return res.json({ images: previewCache[productId] });
-  }
+  const images = PREVIEW_PRODUCTS[productId].map(
+    filename => `/assets/previews/${filename}`
+  );
 
-  const pdfPath = PREVIEW_PRODUCTS[productId];
-
-  if (!fs.existsSync(pdfPath)) {
-    return res.status(404).json({ error: 'PDF faylı tapılmadı.' });
-  }
-
-  try {
-    const images = [];
-    for (let page = 1; page <= 2; page++) {
-      const buffer = await renderPdfPageToBuffer(pdfPath, page);
-      const blurred = await sharp(buffer).blur(18).png().toBuffer();
-      images.push('data:image/png;base64,' + blurred.toString('base64'));
-    }
-
-    previewCache[productId] = images;
-    res.json({ images });
-
-  } catch (error) {
-    console.error('❌ Preview xətası:', error);
-    res.status(500).json({ error: 'Önizləmə yaradıla bilmədi.' });
-  }
+  res.json({ images });
 });
 
 // ============================================
