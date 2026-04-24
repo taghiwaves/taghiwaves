@@ -274,11 +274,11 @@ app.get('/api/download/yeni-sesler', limiter, async (req, res) => {
   if (tracker?.downloaded) {
     return res.status(403).send(`
       <html>
-        <head><title>Download bereits genutzt</title></head>
+        <head><title>Yükləmə artıq istifadə edilib</title></head>
         <body style="font-family: Arial; text-align: center; padding: 50px; background: #0a0a0f; color: #fff;">
-          <h1>⚠️ Download bereits verwendet</h1>
-          <p>Dieser Link wurde bereits einmal genutzt.</p>
-          <p style="color: #00f0ff;">Bei Problemen kontaktiere uns: hello@taghiwaves.com</p>
+          <h1>⚠️ Yükləmə artıq istifadə edilib</h1>
+          <p>Bu link artıq bir dəfə istifadə edilib.</p>
+          <p style="color: #00f0ff;">Problemlər üçün bizimlə əlaqə saxlayın: taghiwaves@gmail.com</p>
         </body>
       </html>
     `);
@@ -298,11 +298,11 @@ app.get('/api/download/yeni-sesler', limiter, async (req, res) => {
       console.error('❌ Datei nicht gefunden:', filePath);
       return res.status(404).send(`
         <html>
-          <head><title>Datei nicht verfügbar</title></head>
+          <head><title>Fayl mövcud deyil</title></head>
           <body style="font-family: Arial; text-align: center; padding: 50px; background: #0a0a0f; color: #fff;">
-            <h1>❌ Datei nicht verfügbar</h1>
-            <p>Die Datei konnte nicht gefunden werden. Bitte kontaktiere den Support.</p>
-            <p style="color: #00f0ff;">E-Mail: hello@taghiwaves.com</p>
+            <h1>❌ Fayl mövcud deyil</h1>
+            <p>Fayl tapılmadı. Zəhmət olmasa dəstək xidməti ilə əlaqə saxlayın.</p>
+            <p style="color: #00f0ff;">E-poçt: taghiwaves@gmail.com</p>
           </body>
         </html>
       `);
@@ -342,7 +342,7 @@ app.get('/api/download/dabstep', limiter, async (req, res) => {
         <body style="font-family: Arial; text-align: center; padding: 50px; background: #0a0a0f; color: #fff;">
           <h1>⚠️ Yükləmə artıq istifadə edilib</h1>
           <p>Bu link artıq bir dəfə istifadə edilib.</p>
-          <p style="color: #00f0ff;">Problemlər üçün bizimlə əlaqə saxlayın: hello@taghiwaves.com</p>
+          <p style="color: #00f0ff;">Problemlər üçün bizimlə əlaqə saxlayın: taghiwaves@gmail.com</p>
         </body>
       </html>
     `);
@@ -365,7 +365,7 @@ app.get('/api/download/dabstep', limiter, async (req, res) => {
           <body style="font-family: Arial; text-align: center; padding: 50px; background: #0a0a0f; color: #fff;">
             <h1>❌ Fayl mövcud deyil</h1>
             <p>Fayl tapılmadı. Zəhmət olmasa dəstək xidməti ilə əlaqə saxlayın.</p>
-            <p style="color: #00f0ff;">E-poçt: hello@taghiwaves.com</p>
+            <p style="color: #00f0ff;">E-poçt: taghiwaves@gmail.com</p>
           </body>
         </html>
       `);
