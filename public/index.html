@@ -1073,6 +1073,7 @@ const translations = {
                 category: getCategory(p.name),
                 description: p.description,
                 price: p.price / 100,
+                isFree: p.isFree || false,
                 pages: getPages(p.name),
                 format: getFormat(p.name),
                 badge: getBadge(p.name),
@@ -1121,6 +1122,7 @@ const translations = {
         if (name.includes('Handbook')) return 'Bestseller';
         if (name.includes('Mastering')) return 'Neu';
         if (name.includes('Drum')) return 'Sale';
+        if (name.includes('Effekt') || name.includes('FX')) return 'Pulsuz';
         return null;
     }
 
@@ -1131,6 +1133,8 @@ const translations = {
         if (name.includes('Template')) return 'layout-template';
         if (name.includes('Synth')) return 'cpu';
         if (name.includes('Drum')) return 'drum';
+        if (name.includes('zərb') || name.includes('Sintezator')) return 'music-2';
+        if (name.includes('Effekt') || name.includes('FX')) return 'zap';
         return 'file-text';
     }
 
@@ -1161,14 +1165,19 @@ const translations = {
                         <span><i data-lucide="download" style="width: 14px; height: 14px;" aria-hidden="true"></i> ${escapeHtml(product.format)}</span>
                     </div>
                     <div class="product-footer">
-                        <div class="product-price">€${product.price.toFixed(2)}</div>
+                        <div class="product-price">${product.isFree ? '<span style="color:#00f0ff;">Pulsuz</span>' : '€' + product.price.toFixed(2)}</div>
                         <div style="display:flex; gap:0.5rem;">
                             <button class="add-to-cart" onclick="openPreview('${getPreviewId(product.title)}')" style="background:rgba(255,255,255,0.05); border-color:rgba(255,255,255,0.15);" aria-label="Önizləmə">
                                 <i data-lucide="eye" style="width: 16px; height: 16px;" aria-hidden="true"></i>
                             </button>
-                            <button class="add-to-cart" onclick="addToCart(${product.id})" aria-label="${escapeHtml(product.title)} ${t('addToCartAriaLabel')}">
-                                <i data-lucide="shopping-cart" style="width: 16px; height: 16px;" aria-hidden="true"></i> <span>${t('addToCart')}</span>
-                            </button>
+                            ${product.isFree
+                                ? `<a class="add-to-cart" href="/api/download/free/effekt-sesleri" download style="text-decoration:none;" aria-label="${escapeHtml(product.title)} yüklə">
+                                    <i data-lucide="download" style="width: 16px; height: 16px;" aria-hidden="true"></i> <span>Pulsuz yüklə</span>
+                                   </a>`
+                                : `<button class="add-to-cart" onclick="addToCart(${product.id})" aria-label="${escapeHtml(product.title)} ${t('addToCartAriaLabel')}">
+                                    <i data-lucide="shopping-cart" style="width: 16px; height: 16px;" aria-hidden="true"></i> <span>${t('addToCart')}</span>
+                                   </button>`
+                            }
                         </div>
                     </div>
                 </div>
@@ -1403,6 +1412,8 @@ const translations = {
     
     function getPreviewId(name) {
         if (name.includes('Dabstep') || name.includes('dabstep')) return 'dabstep';
+        if (name.includes('zərb') || name.includes('Sintezator')) return 'sintezator-zerb';
+        if (name.includes('Effekt') || name.includes('FX')) return 'effekt-sesleri';
         return 'yeni-sesler';
     }
 

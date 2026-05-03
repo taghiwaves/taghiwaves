@@ -97,6 +97,21 @@ const products = [
     price: 50,
     description: "Dabstepin (Dubstep) böyük uğuru musiqi dünyasına yeni bir nəfəs gətirdi. Bir tərəfdən, Britaniya andeqraundundan gələn bu musiqi tərzi bizə yeni növ qruvlar (grooves) bəxş etdi. Beləliklə, popdan rəqs musiqisinə, hətta metala qədər, dabstepin o qəribə, ağır sürünən \"halftime\" ritmikası tərəfindən mənimsənilməyən demək olar ki, heç bir janr qalmadı.",
     image: "/assets/dubstep.png"
+  },
+  {
+    id: "prod_sintezator_zerb",
+    name: "Sintezatordan gələn zərb səsləri",
+    price: 50,
+    description: "Dolğun zərb səsləri bir çox müasir musiqi üslublarının istehsalında əsas şərtdir. Bu sənəddə sıfırdan sintezatorla Bassdrum, Snare, Handclap və Hihat kimi bütün zərb səslərini necə yaradacağınızı öyrənəcəksiniz.",
+    image: "/assets/sintezator-zerb.jpg"
+  },
+  {
+    id: "prod_effekt_sesleri",
+    name: "Effekt səsləri (FX)",
+    price: 0,
+    isFree: true,
+    description: "Effekt səsləri müasir musiqi prodüksiyasında vacib bir elementdir. Bu pulsuz sənəddə Noisesweep, Uplifter, Reverse Crash, FM-Sintezi və daha çox effekt səslərini necə yaradacağınızı öyrənin.",
+    image: "/assets/effekt-sesleri.jpg"
   }
 ];
 
@@ -224,6 +239,9 @@ app.post('/api/webhook', express.raw({type: 'application/json'}), async (req, re
       if (productName.includes('Dabstep')) {
         downloadUrl = `${process.env.APP_URL}/api/download/dabstep?session_id=${session.id}`;
         productTitle = 'Dabstep səhnəsindən yeni səslər';
+      } else if (productName.includes('zərb') || productName.includes('Sintezator')) {
+        downloadUrl = `${process.env.APP_URL}/api/download/sintezator-zerb-sesleri?session_id=${session.id}`;
+        productTitle = 'Sintezatordan gələn zərb səsləri';
       } else {
         downloadUrl = `${process.env.APP_URL}/api/download/yeni-sesler?session_id=${session.id}`;
         productTitle = 'Yeni səslərin yaradılması';
@@ -388,6 +406,94 @@ app.get('/api/download/dabstep', limiter, async (req, res) => {
 });
 
 // ============================================
+// 🆓 FREE DOWNLOAD ROUTE
+// ============================================
+
+app.get('/api/download/free/effekt-sesleri', limiter, (req, res) => {
+  const filePath = path.join(__dirname, 'public', 'downloads', 'effekt-sesleri.pdf');
+
+  if (!fs.existsSync(filePath)) {
+    console.error('❌ Pulsuz fayl tapılmadı:', filePath);
+    return res.status(404).send(`
+      <html>
+        <head><title>Fayl mövcud deyil</title></head>
+        <body style="font-family:Arial;text-align:center;padding:50px;background:#0a0a0f;color:#fff;">
+          <h1>❌ Fayl mövcud deyil</h1>
+          <p>Zəhmət olmasa dəstək xidməti ilə əlaqə saxlayın.</p>
+          <p style="color:#00f0ff;">E-poçt: taghiwaves@gmail.com</p>
+        </body>
+      </html>
+    `);
+  }
+
+  res.download(filePath, 'Effekt səsləri (FX).pdf');
+});
+
+// ============================================
+// 🛡️ PAID DOWNLOAD: Sintezatordan gələn zərb səsləri
+// ============================================
+
+app.get('/api/download/sintezator-zerb-sesleri', limiter, async (req, res) => {
+  const sessionId = req.query.session_id;
+
+  if (!sessionId) {
+    return res.status(403).send('Zugriff verweigert. Bitte erst kaufen.');
+  }
+
+  const tracker = downloadTracker[sessionId];
+  if (tracker?.downloaded) {
+    return res.status(403).send(`
+      <html>
+        <head><title>Yükləmə artıq istifadə edilib</title></head>
+        <body style="font-family:Arial;text-align:center;padding:50px;background:#0a0a0f;color:#fff;">
+          <h1>⚠️ Yükləmə artıq istifadə edilib</h1>
+          <p>Bu link artıq bir dəfə istifadə edilib.</p>
+          <p style="color:#00f0ff;">Problemlər üçün bizimlə əlaqə saxlayın: taghiwaves@gmail.com</p>
+        </body>
+      </html>
+    `);
+  }
+
+  try {
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+    if (session.payment_status !== 'paid') {
+      return res.status(403).send('Ödəniş təsdiqlənmədi.');
+    }
+
+    const filePath = path.join(__dirname, 'public', 'downloads', 'sintezator-zerb-sesleri.pdf');
+
+    if (!fs.existsSync(filePath)) {
+      console.error('❌ Datei nicht gefunden:', filePath);
+      return res.status(404).send(`
+        <html>
+          <head><title>Fayl mövcud deyil</title></head>
+          <body style="font-family:Arial;text-align:center;padding:50px;background:#0a0a0f;color:#fff;">
+            <h1>❌ Fayl mövcud deyil</h1>
+            <p>Fayl tapılmadı. Zəhmət olmasa dəstək xidməti ilə əlaqə saxlayın.</p>
+            <p style="color:#00f0ff;">E-poçt: taghiwaves@gmail.com</p>
+          </body>
+        </html>
+      `);
+    }
+
+    downloadTracker[sessionId] = {
+      downloaded: true,
+      timestamp: new Date(),
+      email: session.customer_details?.email || session.customer_email
+    };
+    saveTracker(downloadTracker);
+    cleanupOldDownloads();
+
+    res.download(filePath, 'Sintezatordan gələn zərb səsləri.pdf');
+
+  } catch (error) {
+    console.error('Download-Fehler:', error);
+    res.status(500).send('Download-Fehler: ' + error.message);
+  }
+});
+
+// ============================================
 // API ROUTES
 // ============================================
 
@@ -455,6 +561,8 @@ app.post('/api/create-checkout-session', limiter, async (req, res) => {
 const PREVIEW_PRODUCTS = {
   'yeni-sesler': ['yeni-sesler-1.jpg', 'yeni-sesler-2.jpg'],
   'dabstep':     ['dabstep-1.jpg', 'dabstep-2.jpg'],
+  'sintezator-zerb': ['sintezator-zerb-1.jpg', 'sintezator-zerb-2.jpg'],
+  'effekt-sesleri':  ['effekt-sesleri-1.jpg', 'effekt-sesleri-2.jpg'],
 };
 
 app.get('/api/preview/:productId', limiter, (req, res) => {
